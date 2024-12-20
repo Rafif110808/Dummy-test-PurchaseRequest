@@ -25,7 +25,7 @@ class IsLogin implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        if (!empty(session()->get('userid'))) {
+        if (!empty(getSession('userid'))) {
             return redirect()->to(base_url('user'));
         }
     }

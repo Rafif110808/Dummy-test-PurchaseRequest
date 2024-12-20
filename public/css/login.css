@@ -1,0 +1,532 @@
+:root {
+  --primary: rgba(21, 66, 59);
+}
+.container-fluid {
+  margin-left: 0 !important;
+  padding: 0 !important;
+  width: 100vw !important;
+  height: -webkit-fill-available;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.container-fluid.login-bg {
+  background-image: linear-gradient(
+    rgba(21, 66, 59),
+    rgba(107, 155, 137),
+    rgba(248, 240, 252)
+  );
+}
+.container-fluid .logo {
+  width: 25rem;
+  object-fit: contain;
+  margin-bottom: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.container-fluid .login-card {
+  right: 16%;
+  margin: 0 auto;
+  width: max-content;
+  height: max-content;
+  background-color: #e8fff2;
+  border-radius: 8px;
+  padding-inline: 40px;
+  padding-block: 32px;
+  filter: drop-shadow(1.5px 1.5px 3px rgba(108, 108, 108, 0.5));
+}
+.container-fluid .login-card form#form-login {
+  margin-top: 32px;
+}
+.container-fluid .login-card .login-label {
+  font-size: 20px;
+  color: var(--primary);
+  display: flex;
+  justify-content: center;
+  font-weight: 800;
+}
+.container-fluid .login-card form#form-login .form-append {
+  width: 300px !important;
+  margin-top: 14px;
+}
+.container-fluid .login-card form#form-login input {
+  border: none !important;
+  outline: 0 !important;
+  background-color: transparent;
+  border-bottom: 1px solid rgba(140, 172, 201, 0.65) !important;
+  width: 89%;
+  border-radius: 0;
+}
+.container-fluid .login-card form#form-login input#password {
+  width: 81.5%;
+}
+.container-fluid .login-card form#form-login input:focus {
+  border: none !important;
+  outline: 0 !important;
+  border-bottom: 1px solid var(--primary) !important;
+}
+.container-fluid .login-card form#form-login .form-append i {
+  margin-right: 5px;
+}
+.container-fluid .login-card form#form-login .form-append i#show-pass {
+  cursor: pointer;
+}
+@media (min-width: 800px) {
+  .container-fluid.sc-lg {
+    display: flex;
+    flex-direction: column;
+  }
+  .container-fluid.sc-sm {
+    display: none;
+  }
+}
+@media (min-width: 320px) and (max-width: 374px) {
+  .container-fluid.sc-lg {
+    display: none;
+  }
+  .container-fluid.sc-sm {
+    height: -webkit-fill-available !important;
+    align-items: start !important;
+    flex-wrap: wrap;
+  }
+  .container-fluid.sc-sm .login-logo {
+    width: 100%;
+    height: max-content;
+    max-width: 100%;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+  .container-fluid.sc-sm .login-logo::before {
+    content: "";
+    background: linear-gradient(45deg, #15423b 45%, #6b9b89, #c5dad3);
+    position: fixed;
+    height: 6rem;
+    width: 100%;
+    z-index: -1;
+    top: 0;
+    border-bottom-left-radius: 25px;
+  }
+  .container-fluid.sc-sm .login-logo img {
+    margin: 0;
+    padding: 0;
+    width: 65%;
+    object-fit: contain;
+  }
+  .container-fluid.sc-sm .shape-rect {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    height: -webkit-fill-available;
+  }
+  .container-fluid.sc-sm .shape-rect svg {
+    position: absolute;
+    width: 86%;
+    height: 80%;
+    margin-inline: 20px !important;
+  }
+  .container-fluid.sc-sm .shape-rect .head-msg {
+    position: absolute;
+    top: 20%;
+    text-align: center;
+    margin-top: 14px;
+    padding-inline: 24px;
+  }
+  .container-fluid.sc-sm .shape-rect .head-msg h4 {
+    font-size: 20px;
+  }
+  .container-fluid.sc-sm .shape-rect .head-msg p {
+    font-size: 14px !important;
+  }
+  .container-fluid.sc-sm .shape-rect .medpack-logo {
+    width: 100%;
+    height: max-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 32%;
+  }
+  .container-fluid.sc-sm .shape-rect .medpack-logo img {
+    width: 185px;
+    height: 100%;
+    object-fit: contain;
+  }
+  .container-fluid.sc-sm .shape-rect .foot-msg {
+    position: absolute;
+    bottom: 34%;
+    width: inherit;
+    display: flex;
+    justify-content: center;
+  }
+  .container-fluid.sc-sm .content-log {
+    width: inherit;
+    margin-top: 45px;
+    height: 75%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+  .container-fluid.sc-sm .head-log {
+    width: 100%;
+    margin-top: -75px;
+    text-align: center;
+  }
+  .container-fluid.sc-sm .head-log h4 {
+    font-size: 22px;
+  }
+  .container-fluid.sc-sm .form-log {
+    height: inherit;
+    width: 100%;
+    padding-inline: 20px;
+    margin-top: -100px !important;
+  }
+  .container-fluid.sc-sm .form-log form {
+    width: 100%;
+    padding-inline: 10px;
+  }
+  .container-fluid.sc-sm .form-log form .form-group {
+    width: 100% !important;
+  }
+  .container-fluid.sc-sm .form-log form .form-group .form-append {
+    position: relative;
+  }
+  .container-fluid.sc-sm
+    .form-log
+    form
+    .form-group
+    .form-append
+    .form-append-leading {
+    position: absolute;
+    left: 8px;
+    top: 28%;
+  }
+  .container-fluid.sc-sm .form-log form .form-group .form-append .form-input {
+    padding-inline: 32px;
+    padding-block: 10px;
+    width: 100%;
+  }
+  .container-fluid.sc-sm
+    .form-log
+    form
+    .form-group
+    .form-append
+    .form-append-trailing {
+    position: absolute;
+    right: 10px;
+    top: 28%;
+  }
+}
+@media (min-width: 375px) and (max-width: 424px) {
+  .container-fluid.sc-lg {
+    display: none;
+  }
+  .container-fluid.sc-sm {
+    height: -webkit-fill-available !important;
+    align-items: start !important;
+    flex-wrap: wrap;
+  }
+  .container-fluid.sc-sm .login-logo {
+    width: 100%;
+    height: max-content;
+    max-width: 100%;
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+  }
+  .container-fluid.sc-sm .login-logo::before {
+    content: "";
+    background: linear-gradient(45deg, #15423b 45%, #6b9b89, #c5dad3);
+    position: fixed;
+    height: 6rem;
+    width: 100%;
+    z-index: -1;
+    top: 0;
+    border-bottom-left-radius: 25px;
+  }
+  .container-fluid.sc-sm .login-logo img {
+    margin: 0;
+    padding: 0;
+    width: 65%;
+    object-fit: contain;
+  }
+  .container-fluid.sc-sm .shape-rect {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    height: -webkit-fill-available;
+  }
+  .container-fluid.sc-sm .shape-rect svg {
+    position: absolute;
+    width: 86%;
+    height: 80%;
+    margin-inline: 20px !important;
+  }
+  .container-fluid.sc-sm .shape-rect .head-msg {
+    position: absolute;
+    top: 20%;
+    text-align: center;
+    margin-top: 14px;
+    padding-inline: 24px;
+  }
+  .container-fluid.sc-sm .shape-rect .head-msg h4 {
+    font-size: 20px;
+  }
+  .container-fluid.sc-sm .shape-rect .head-msg p {
+    font-size: 14px !important;
+  }
+  .container-fluid.sc-sm .shape-rect .medpack-logo {
+    width: 100%;
+    height: max-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 32%;
+  }
+  .container-fluid.sc-sm .shape-rect .medpack-logo img {
+    width: 185px;
+    height: 100%;
+    object-fit: contain;
+  }
+  .container-fluid.sc-sm .shape-rect .foot-msg {
+    position: absolute;
+    bottom: 34%;
+    width: inherit;
+    display: flex;
+    justify-content: center;
+  }
+  .container-fluid.sc-sm .content-log {
+    width: inherit;
+    margin-top: 45px;
+    height: 75%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+  .container-fluid.sc-sm .head-log {
+    width: 100%;
+    margin-top: -75px;
+    text-align: center;
+  }
+  .container-fluid.sc-sm .head-log h4 {
+    font-size: 22px;
+  }
+  .container-fluid.sc-sm .form-log {
+    height: inherit;
+    width: 100%;
+    padding-inline: 20px;
+    margin-top: -100px !important;
+  }
+  .container-fluid.sc-sm .form-log form {
+    width: 100%;
+    padding-inline: 10px;
+  }
+  .container-fluid.sc-sm .form-log form .form-group {
+    width: 100% !important;
+  }
+  .container-fluid.sc-sm .form-log form .form-group .form-append {
+    position: relative;
+  }
+  .container-fluid.sc-sm
+    .form-log
+    form
+    .form-group
+    .form-append
+    .form-append-leading {
+    position: absolute;
+    left: 8px;
+    top: 28%;
+  }
+  .container-fluid.sc-sm .form-log form .form-group .form-append .form-input {
+    padding-left: 32px;
+    padding-block: 10px;
+    width: 100%;
+  }
+  .container-fluid.sc-sm
+    .form-log
+    form
+    .form-group
+    .form-append
+    .form-append-trailing {
+    position: absolute;
+    right: 10px;
+    top: 28%;
+  }
+}
+@media (min-width: 425px) and (max-width: 767px) {
+  .container-fluid.sc-lg {
+    display: none;
+  }
+  .container-fluid.sc-sm {
+    height: -webkit-fill-available !important;
+    align-items: start !important;
+    flex-wrap: wrap;
+  }
+  .container-fluid.sc-sm .login-logo {
+    width: 100%;
+    height: max-content;
+    max-width: 100%;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+  .container-fluid.sc-sm .login-logo::before {
+    content: "";
+    background: linear-gradient(45deg, #15423b 45%, #6b9b89, #c5dad3);
+    position: fixed;
+    height: 6rem;
+    width: 100%;
+    z-index: -1;
+    top: 0;
+    border-bottom-left-radius: 25px;
+  }
+  .container-fluid.sc-sm .login-logo img {
+    margin: 0;
+    padding: 0;
+    width: 50%;
+    object-fit: contain;
+  }
+  .container-fluid.sc-sm .shape-rect {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    height: -webkit-fill-available;
+  }
+  .container-fluid.sc-sm .shape-rect svg {
+    position: absolute;
+    width: 86%;
+    height: 80%;
+    margin-inline: 20px !important;
+  }
+  .container-fluid.sc-sm .shape-rect .head-msg {
+    position: absolute;
+    top: 20%;
+    text-align: center;
+    margin-top: 14px;
+    padding-inline: 24px;
+  }
+  .container-fluid.sc-sm .shape-rect .head-msg h4 {
+    font-size: 20px;
+  }
+  .container-fluid.sc-sm .shape-rect .head-msg p {
+    font-size: 14px !important;
+  }
+  .container-fluid.sc-sm .shape-rect .medpack-logo {
+    width: 100%;
+    height: max-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 32%;
+  }
+  .container-fluid.sc-sm .shape-rect .medpack-logo img {
+    width: 185px;
+    height: 100%;
+    object-fit: contain;
+  }
+  .container-fluid.sc-sm .shape-rect .foot-msg {
+    position: absolute;
+    bottom: 34%;
+    width: inherit;
+    display: flex;
+    justify-content: center;
+  }
+  .container-fluid.sc-sm .content-log {
+    width: inherit;
+    margin-top: 45px;
+    height: 75%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+  .container-fluid.sc-sm .head-log {
+    width: 100%;
+    margin-top: -75px;
+    text-align: center;
+  }
+  .container-fluid.sc-sm .head-log h4 {
+    font-size: 22px;
+  }
+  .container-fluid.sc-sm .form-log {
+    height: inherit;
+    width: 100%;
+    padding-inline: 20px;
+    margin-top: -100px !important;
+  }
+  .container-fluid.sc-sm .form-log form {
+    width: 100%;
+    padding-inline: 10px;
+  }
+  .container-fluid.sc-sm .form-log form .form-group {
+    width: 100% !important;
+  }
+  .container-fluid.sc-sm .form-log form .form-group .form-append {
+    position: relative;
+  }
+  .container-fluid.sc-sm
+    .form-log
+    form
+    .form-group
+    .form-append
+    .form-append-leading {
+    position: absolute;
+    left: 8px;
+    top: 28%;
+  }
+  .container-fluid.sc-sm .form-log form .form-group .form-append .form-input {
+    padding-block: 10px;
+    padding-inline: 32px;
+    width: 100%;
+  }
+  .container-fluid.sc-sm
+    .form-log
+    form
+    .form-group
+    .form-append
+    .form-append-trailing {
+    position: absolute;
+    right: 10px;
+    top: 28%;
+  }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .container-fluid.sc-lg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+  }
+  .container-fluid.sc-lg .login-card {
+    right: 23%;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1365px) {
+  .container-fluid.sc-lg .rect {
+    left: -32%;
+    width: 600px;
+  }
+}
+@media (min-width: 1366px) and (max-width: 1439px) {
+  .container-fluid.sc-lg .rect {
+    left: -20%;
+  }
+}
+@media (min-width: 1440px) and (max-width: 2500px) {
+  .container-fluid.sc-lg .rect {
+    left: -18%;
+  }
+}

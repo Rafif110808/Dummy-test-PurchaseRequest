@@ -14,18 +14,27 @@ class User extends BaseController
     public function __construct()
     {
         $this->userModel = new MUser();
+        $this->bc = [
+            [
+                'Setting',
+                'User'
+            ]
+        ];
     }
 
     public function index()
     {
-        return view('v_user', [
-            'title' => 'Master User'
+        return view('master/user/v_user', [
+            'title' => 'User',
+            'akses' => null,
+            'breadcrumb' => $this->bc,
+            'section' => 'Setting User',
         ]);
     }
 
     public function viewLogin()
     {
-        return view('v_login', [
+        return view('login/v_login', [
             'title' => 'Login'
         ]);
     }
@@ -41,7 +50,8 @@ class User extends BaseController
             $row = $this->userModel->getByName($username);
             if (empty($row)) throw new Exception("User tidak terdaftar di sistem!");
             if (password_verify($password, $row['password'])) {
-                session()->set('userid', $row['id']);
+                setSession('userid', $row['id']);
+                setSession('name', $row['fullname']);
                 $res = [
                     'sukses' => '1',
                     'pesan' => 'Berhasil Login',
@@ -69,8 +79,8 @@ class User extends BaseController
             ->make();
 
         $table->updateRow(function ($db, $no) {
-            $btn_edit = "<button style='background-color: rgba(204, 167, 0);color:#fff;text-align:center;' onclick=\"editData('" . base_url('user/form/' . $db->id) . "')\">Edit</button>";
-            $btn_hapus = "<button style='background-color: rgba(243, 61, 33);color:#fff;text-align:center;' onclick=\"hapusData($db->id)\">Hapus</button>";
+            $btn_edit = "<button type='button' class='btn btn-sm btn-warning' onclick=\"modalForm('Update User - " . $db->fullname . "', 'modal-lg', '" . getURL('user/form/' . encrypting($db->id)) . "', {identifier: this})\"><i class='bx bx-edit-alt'></i></button>";
+            $btn_hapus = "<button type='button' class='btn btn-sm btn-danger' onclick=\"modalDelete('Delete User - " . $db->fullname . "', {'link':'" . getURL('user/delete') . "', 'id':'" . encrypting($db->id) . "', 'pagetype':'table'})\"><i class='bx bx-trash'></i></button>";
             return [
                 $no,
                 $db->fullname,
@@ -83,13 +93,30 @@ class User extends BaseController
         $table->toJson();
     }
 
+    public function forms($id = '')
+    {
+        $form_type = (empty($id) ? 'add' : 'edit');
+        $row = [];
+        if ($id != '') {
+            $id = decrypting($id);
+            $row = $this->userModel->getOne($id);
+        }
+        $dt['view'] = view('master/user/v_form', [
+            'form_type' => $form_type,
+            'row' => $row,
+            'userid' => $id
+        ]);
+        $dt['csrfToken'] = csrf_hash();
+        echo json_encode($dt);
+    }
+
     public function addData()
     {
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
-        $fullname = $this->request->getPost('fullname');
+        $fullname = $this->request->getPost('name');
         $email = $this->request->getPost('email');
-        $phone = $this->request->getPost('telp');
+        $phone = $this->request->getPost('phone');
         $res = array();
 
         $this->db->transBegin();
@@ -129,39 +156,19 @@ class User extends BaseController
         echo json_encode($res);
     }
 
-    public function formEdit($userid)
-    {
-        $row = $this->userModel->getOne($userid);
-        if (empty($userid)) {
-            echo json_encode([
-                'sukses' => '0',
-                'pesan' => 'Data tidak ditemukan!',
-                'dbError' => db_connect()->error()
-            ]);
-            die;
-        }
-        echo json_encode([
-            'sukses' => '1',
-            'pesan' => 'Berhasil ambil data!',
-            'dbError' => db_connect()->error(),
-            'row' => $row,
-        ]);
-    }
-
     public function updateData()
     {
-        $userid = $this->request->getPost('userid');
+        $userid = $this->request->getPost('id');
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
-        $fullname = $this->request->getPost('fullname');
+        $fullname = $this->request->getPost('name');
         $email = $this->request->getPost('email');
-        $phone = $this->request->getPost('telp');
+        $phone = $this->request->getPost('phone');
         $res = array();
 
         $this->db->transBegin();
         try {
             if (empty($username)) throw new Exception("Username dibutuhkan!");
-            if (empty($password)) throw new Exception("Password dibutuhkan!");
             if (empty($fullname)) throw new Exception("Fullname masih kosong!");
             $row = $this->userModel->getByName($fullname);
             if (!empty($row)) throw new Exception("User dengan username ini sudah terdaftar!");
@@ -200,7 +207,7 @@ class User extends BaseController
 
     public function deleteData()
     {
-        $userid = $this->request->getPost('userid');
+        $userid = decrypting($this->request->getPost('id'));
         $res = array();
         $this->db->transBegin();
         try {
@@ -230,7 +237,7 @@ class User extends BaseController
         $userid = session()->get('userid');
         $row = $this->userModel->getOne($userid);
         if (!empty($row)) {
-            session()->destroy();
+            destroySession();
         }
         return redirect('login');
     }
