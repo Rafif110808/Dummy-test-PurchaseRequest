@@ -27,6 +27,16 @@ $routes->group('user', function ($routes) {
 });
 // Routing Master Dibawah Sini ---------------------------
 
+$routes->group('customer', function ($routes) { 
+    $routes->add('', 'Customer::index', $this->noauth);
+    $routes->add('table', 'Customer::datatable', $this->noauth);
+    $routes->add('add', 'Customer::addData', $this->noauth);
+    $routes->add('form', 'Customer::forms', $this->noauth); // Form tanpa parameter
+    $routes->add('form/(:num)', 'Customer::forms/$1', $this->noauth); // Form dengan parameter
+    $routes->add('update', 'Customer::updateData', $this->noauth);
+    $routes->add('delete', 'Customer::deleteData', $this->noauth);
+});
+
 $routes->group('category', function ($routes) { 
     $routes->add('', 'Category::index', $this->noauth);
     $routes->add('table', 'Category::datatable', $this->noauth);
@@ -59,7 +69,6 @@ $routes->group('project', function ($routes) {
     $routes->add('update', 'Project::updateData', $this->noauth);
     $routes->add('delete', 'Project::deleteData', $this->noauth);
 });
-
 
 // -------------------------------------------------------->
 // Log Out
