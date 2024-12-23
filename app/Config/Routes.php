@@ -10,6 +10,8 @@ $this->noauth = ['filter' => 'noauth'];
  * @var RouteCollection $routes
  */
 $routes->add('/', 'User::viewLogin', $this->auth);
+
+
 // Login
 $routes->group('login', function ($routes) {
     $routes->add('', 'User::viewLogin', $this->auth);
@@ -25,7 +27,18 @@ $routes->group('user', function ($routes) {
     $routes->add('update', 'User::updateData', $this->noauth);
     $routes->add('delete', 'User::deleteData', $this->noauth);
 });
-// Routing Master Dibawah Sini ---------------------------
+
+//document ROUTES
+$routes->group('document', function ($routes) {
+    $routes->add('', 'document::index', $this->noauth);
+    $routes->add('table', 'document::datatable', $this->noauth);
+    $routes->add('add', 'document::addData', $this->noauth);
+    $routes->add('form', 'document::forms', $this->noauth);
+    $routes->add('form/(:any)', 'document::forms/$1', $this->noauth);
+    $routes->add('update', 'document::updateData', $this->noauth);
+    $routes->add('delete', 'document::deleteData', $this->noauth);
+});
+
 
 // -------------------------------------------------------->
 // Log Out

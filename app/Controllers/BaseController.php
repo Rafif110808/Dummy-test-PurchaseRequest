@@ -28,6 +28,8 @@ abstract class BaseController extends Controller
      */
     protected $request;
 
+    protected $db;
+
     /**
      * An array of helpers to be loaded automatically upon
      * class instantiation. These helpers will be available

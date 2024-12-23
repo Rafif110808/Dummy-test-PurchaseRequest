@@ -8,9 +8,12 @@ use App\Models\MUser;
 use CodeIgniter\HTTP\ResponseInterface;
 use Exception;
 
+
 class User extends BaseController
 {
     protected $userModel;
+    protected $bc;
+    protected $db;
     public function __construct()
     {
         $this->userModel = new MUser();
