@@ -153,7 +153,7 @@ class Category extends BaseController
 
             $res = [
                 'sukses' => '1',
-                'pesan' => 'Sukses menambahkan Customer',
+                'pesan' => 'Sukses menambahkan Category',
                 'dbError' => db_connect()
             ];
             $this->categoryModel->transCommit();
