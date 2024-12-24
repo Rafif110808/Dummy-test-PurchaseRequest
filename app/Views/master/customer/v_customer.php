@@ -3,9 +3,17 @@
 <div class="main-content content margin-t-4">
     <div class="card p-x shadow-sm w-100">
         <div class="card-header dflex align-center justify-end">
+        <button class="btn btn-warning dflex align-center margin-r-2" onclick="window.location.href='<?= getURL('user/printpdf') ?>'">
+                <i class="bx bx-printer margin-r-2"></i>
+                <span class="fw-normal fs-7">Print PDF</span>
+            </button>
             <button class="btn btn-primary d-flex align-center" onclick="return modalForm('Tambah Customer', 'modal-lg', '<?= getURL('customer/form') ?>')">
                 <i class="bx bx-plus-circle margin-r-2"></i>
-                <span class="fw-normal fs-7">Tambah Customer</span>
+                <span class="fw-normal fs-7">Add New</span>
+            </button>
+            <button class="btn btn-primary d-flex align-center margin-l-2" onclick="exportExcel()">
+                <i class="bx bx-download margin-r-2"></i>
+                <span class="fw-normal fs-7">Export Excel</span>
             </button>
         </div>
         <div class="card-body">
@@ -70,5 +78,8 @@
                 alert(thrownError);
             }
         })
+    }
+    function exportExcel() {
+        window.location.href = "<?= base_url('customer/exportexcel') ?>";
     }
 </script>
