@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
@@ -7,13 +6,18 @@ use App\Helpers\Datatables\Datatables;
 use App\Models\MCategory;
 use App\Models\MUser;
 use CodeIgniter\HTTP\ResponseInterface;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Exception;
+use Fpdf\Fpdf;
 
 class Category extends BaseController
 {
     protected $categoryModel;
     protected $bc;
     protected $db;
+
     public function __construct()
     {
         $this->categoryModel = new MCategory();
@@ -31,7 +35,14 @@ class Category extends BaseController
             'title' => 'Category',
             'akses' => null,
             'breadcrumb' => $this->bc,
-            'section' => 'Setting User',
+            'section' => 'Setting Category',
+        ]);
+    }
+
+    public function viewLogin()
+    {
+        return view('login/v_login', [
+            'title' => 'Login'
         ]);
     }
 
@@ -61,7 +72,7 @@ class Category extends BaseController
         $row = [];
         if ($categoryid != '') {
             $categoryid = decrypting($categoryid);
-            $row = $this->categoryModel->getOne($categoryid);
+            $row = $this->categoryModel->find($categoryid);
         }
         $dt['view'] = view('master/category/v_form', [
             'form_type' => $form_type,
@@ -71,10 +82,101 @@ class Category extends BaseController
         $dt['csrfToken'] = csrf_hash();
         echo json_encode($dt);
     }
+    public function exportPdf()
+{
+    $categories = $this->categoryModel->findAll();
+
+    $pdf = new Fpdf();
+    $pdf->AddPage();
+    $pdf->SetFont('Arial', 'B', 12);
+
+
+    $pdf->Cell(10, 10, 'No', 1);
+    $pdf->Cell(50, 10, 'Category Name', 1);
+    $pdf->Cell(80, 10, 'Description', 1);
+    $pdf->Cell(50, 10, 'Filepath', 1);
+    $pdf->Ln();
+
+
+    $pdf->SetFont('Arial', '', 12);
+    $row = 1;
+    foreach ($categories as $index => $category) {
+        $pdf->Cell(10, 10, $index + 1, 1);
+        $pdf->Cell(50, 10, $category['categoryname'], 1);
+        $pdf->Cell(80, 10, $category['description'], 1);
+        $pdf->Cell(50, 10, $category['filepath'], 1);
+        $pdf->Ln();
+    }
+
+  
+    $pdf->Output('D', 'categories.pdf');
+}
+
+    public function export()
+    {
+        $categories = $this->categoryModel->findAll(); 
+    
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+    
+
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['argb' => 'FFFFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['argb' => 'FF4CAF50'],
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ];
+    
+ 
+        $dataStyle = [
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ];
+    
+
+        $sheet->setCellValue('A1', 'No')
+            ->setCellValue('B1', 'Category Name')
+            ->setCellValue('C1', 'Description')
+            ->setCellValue('D1', 'Filepath');
+        $sheet->getStyle('A1:D1')->applyFromArray($headerStyle);
+    
+
+        foreach (range('A', 'D') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+    
+
+        $row = 2;
+        foreach ($categories as $index => $category) {
+            $sheet->setCellValue('A' . $row, $index + 1);
+            $sheet->setCellValue('B' . $row, $category['categoryname']);
+            $sheet->setCellValue('C' . $row, $category['description']);
+            $sheet->setCellValue('D' . $row, $category['filepath']);
+            $sheet->getStyle('A' . $row . ':D' . $row)->applyFromArray($dataStyle);
+            $row++;
+        }
+    
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'category.xlsx';
+    
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+    }
 
     public function addData()
     {
-
         $categoryname = $this->request->getPost('namakategori');
         $description = $this->request->getPost('deskripsi');
         $filepath = $this->request->getFile('foto');
@@ -86,21 +188,18 @@ class Category extends BaseController
             if (empty($categoryname)) throw new Exception("Nama kategori dibutuhkan!");
             if (empty($description)) throw new Exception("Deskripsi masih kosong!");
 
-
-            // Validasi ekstensi file
             $allowedExtensions = ['jpg', 'jpeg', 'png'];
             $extension = $filepath->getExtension();
             if (!in_array($extension, $allowedExtensions)) {
                 throw new Exception("Format filepath tidak valid, hanya jpg, jpeg, dan png yang diperbolehkan!");
             }
 
-            // Generate nama file unik untuk filepath
+      
             $newName = $filepath->getRandomName();
-            $filepath->move('uploads/category/', $newName); // Pindahkan file ke folder uploads/categorys/
-            $filePath = 'uploads/category/' . $newName; // Path file yang disimpan
+            $filepath->move('uploads/category/', $newName);
+            $filePath = 'uploads/category/' . $newName; 
 
-            // Simpan data ke database
-            $this->categoryModel->store([
+            $this->categoryModel->insert([
                 'filepath' => $filePath,
                 'categoryname' => $categoryname,
                 'description' => $description,
@@ -131,7 +230,7 @@ class Category extends BaseController
 
     public function updateData()
     {
-        $categoryid = $this->request->getPost('categoryid'); // Retrieve category ID from POST data
+        $categoryid = $this->request->getPost('categoryid');
         $categoryname = $this->request->getPost('namakategori');
         $description = $this->request->getPost('deskripsi');
         $filepath = $this->request->getFile('foto');
@@ -151,26 +250,26 @@ class Category extends BaseController
             ];
 
             if ($filepath && $filepath->isValid()) {
-                // Validasi ekstensi file
+               
                 $allowedExtensions = ['jpg', 'jpeg', 'png'];
                 $extension = $filepath->getExtension();
                 if (!in_array($extension, $allowedExtensions)) {
                     throw new Exception("Format foto tidak valid, hanya jpg, jpeg, dan png yang diperbolehkan!");
                 }
 
-                // Hapus file lama jika ada
-                $oldFilePath = $this->categoryModel->getOne($categoryid)['filepath'];
+              
+                $oldFilePath = $this->categoryModel->find($categoryid)['filepath'];
                 if (file_exists($oldFilePath)) {
                     unlink($oldFilePath);
                 }
 
-                // Simpan file baru
+        
                 $newName = $filepath->getRandomName();
                 $filepath->move('uploads/category/', $newName);
                 $data['filepath'] = 'uploads/category/' . $newName;
             }
 
-            $this->categoryModel->edit($data, $categoryid);
+            $this->categoryModel->update($categoryid, $data);
             $res = [
                 'sukses' => '1',
                 'pesan' => 'Sukses update user baru',
@@ -199,11 +298,11 @@ class Category extends BaseController
             if (empty($categoryid)) throw new Exception("ID category tidak ditemukan!");
 
             $categoryid = decrypting($categoryid);
-            $row = $this->categoryModel->getOne($categoryid);
+            $row = $this->categoryModel->find($categoryid);
 
             if (empty($row)) throw new Exception("User tidak terdaftar di sistem!");
 
-            $this->categoryModel->destroy('id', $categoryid);
+            $this->categoryModel->delete($categoryid);
 
             $res = [
                 'sukses' => '1',
