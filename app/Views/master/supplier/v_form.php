@@ -27,7 +27,7 @@
     <div class="form-group">
         <label for="filepath">FilePath : </label>
         <input type="file" class="form-input fs-7" id="filepath" name="filepath"
-            value="<?= (($form_type == 'edit') ? $row['filepath'] : '') ?>" required>
+            value="<?= (($form_type == 'edit') ? $row['filepath'] : '') ?>" required accept="image/*">
     </div>
     <input type="hidden" id="csrf_token_form" name="<?= csrf_token() ?>">
     <div class="modal-footer">
@@ -49,11 +49,9 @@
         if (form_type == 'edit') {
             $('#btn-reset').attr('disabled', true);
         }
-
         $('#btn-submit').click(function () {
             $('#form-supplier').trigger('submit');
         });
-
         $('#form-supplier').on('submit', function (e) {
             e.preventDefault();
             let csrf = decrypter($("#csrf_token").val());
@@ -87,6 +85,13 @@
                         close_modal('modaldetail');
                         tbl.ajax.reload();
                     }
+                    $('#btn-submit').on('click', function (e) {
+                        $(this).attr('disabled', true);
+                        setTimeout(function () {
+                            $('#btn-submit').attr('disabled', false);
+                        },
+                            3000);
+                    });
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     showError(thrownError + ", please contact administrator for the further");

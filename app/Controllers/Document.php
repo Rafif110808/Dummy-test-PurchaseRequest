@@ -16,7 +16,7 @@ class Document extends BaseController
     protected $db;
     public function __construct()
     {
-        $this->MDocument = new \App\Models\MDocument();
+        $this->MDocument = new MDocument();
         $this->bc = [
             [
                 'Setting',
@@ -96,17 +96,17 @@ class Document extends BaseController
 
             // Generate nama file unik untuk filepath
             $newName = $filepath->getRandomName();
-            $filepath->move('uploads/document/', $newName);
-            $filePath = 'uploads/document/' . $newName;
+            $filepath->move('uploads/document', $newName);
+            $filePath = 'uploads/document' . $newName;
 
             $this->MDocument->store([
                 'documentname' => $documentname,
                 'description' => $description,
                 'filepath' => $filePath,
                 'createddate' => date('Y-m-d H:i:s'),
-                'createdby' => 1,
+                'createdby' => getSession('userid'),
                 'updateddate' => date('Y-m-d H:i:s'),
-                'updatedby' => 1,
+                'updatedby' => getSession('userid'),
             ]);
 
             $db->transCommit();
@@ -132,9 +132,9 @@ class Document extends BaseController
 
     public function updateData()
     {
-        
+
         $userid = $this->request->getPost('id');
-        $documentname = $this->request->getPost('documentname');
+        $documentname = $this->request->getPost('name');
         $description = $this->request->getPost('description');
         $filepath = $this->request->getFile('dokumen');
         $res = array();
@@ -147,9 +147,9 @@ class Document extends BaseController
             $data = [
                 'documentname' => $documentname,
                 'description' => $description,
-                'filepath' => $filepath,
+                'dokumen' => $filepath,
                 'updateddate' => date('Y-m-d H:i:s'),
-                'updatedby' => $userid,
+                'updatedby' => getSession('userid'),
             ];
 
             if ($filepath && $filepath->isValid()) {
@@ -157,19 +157,26 @@ class Document extends BaseController
                 $allowedExtensions = ['doc', 'docx', 'pdf', 'xlsx'];
                 $extension = $filepath->getExtension();
                 if (!in_array($extension, $allowedExtensions)) {
-                    throw new Exception("Format foto tidak valid, hanya jpg, jpeg, dan png yang diperbolehkan!");
+                    throw new Exception("Format foto tidak valid, hanya docx, doc, pdf, xlsx diperbolehkan!");
                 }
-    
+
                 // Hapus file lama jika ada
                 $oldFilePath = $this->MDocument->getOne($userid)['filepath'];
                 if (file_exists($oldFilePath)) {
                     unlink($oldFilePath);
                 }
-    
+
                 // Simpan file baru
                 $newName = $filepath->getRandomName();
-                $filepath->move('uploads/document/', $newName);
-                $data['filepath'] = 'uploads/document/' . $newName;
+                $filepath->move('uploads/document', $newName);
+                $data['filepath'] = 'uploads/document' . $newName;
+
+
+                // Hapus file lama jika ada
+                $oldFilePath = $this->MDocument->getOne($userid)['filepath'];
+                if (file_exists($oldFilePath)) {
+                    unlink($oldFilePath);
+                }
             }
 
             $this->MDocument->edit($data, $userid);
@@ -217,15 +224,5 @@ class Document extends BaseController
         }
         $this->db->transComplete();
         echo json_encode($res);
-    }
-
-    public function logOut()
-    {
-        $userid = session()->get('userid');
-        $row = $this->MDocument->getOne($userid);
-        if (!empty($row)) {
-            destroySession();
-        }
-        return redirect('login');
     }
 }

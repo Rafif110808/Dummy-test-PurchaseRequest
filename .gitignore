@@ -48,6 +48,10 @@ Vagrantfile
 #-------------------------
 # Temporary Files
 #-------------------------
+
+app/config/*
+uploads/*
+
 writable/cache/*
 !writable/cache/index.html
 
@@ -124,3 +128,4 @@ nb-configuration.xml
 
 /results/
 /phpunit*.xml
+public/images/uploads/
