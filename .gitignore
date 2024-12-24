@@ -51,6 +51,7 @@ Vagrantfile
 
 app/config/*
 uploads/*
+upload/*
 
 writable/cache/*
 !writable/cache/index.html

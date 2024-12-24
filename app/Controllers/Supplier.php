@@ -7,6 +7,7 @@ use App\Helpers\Datatables\Datatables;
 use App\Models\MSupplier;
 use CodeIgniter\HTTP\ResponseInterface;
 use Exception;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Supplier extends BaseController
 {
@@ -66,10 +67,14 @@ class Supplier extends BaseController
         $this->db->transBegin();
         try {
             // Validasi input
-            if (empty($suppliername)) throw new Exception('Masukkan nama supplier');
-            if (empty($address)) throw new Exception('Masukkan alamat');
-            if (empty($phone)) throw new Exception('Masukkan nomor HP');
-            if (empty($email)) throw new Exception('Masukkan email');
+            if (empty($suppliername))
+                throw new Exception('Masukkan nama supplier');
+            if (empty($address))
+                throw new Exception('Masukkan alamat');
+            if (empty($phone))
+                throw new Exception('Masukkan nomor HP');
+            if (empty($email))
+                throw new Exception('Masukkan email');
 
             $allowedExtensions = ['jpg', 'jpeg', 'png'];
             $extension = $filepath->getExtension();
@@ -147,10 +152,14 @@ class Supplier extends BaseController
         $this->db->transBegin();
         try {
             // Validasi input
-            if (empty($suppliername)) throw new Exception('Masukkan nama supplier');
-            if (empty($address)) throw new Exception('Masukkan alamat');
-            if (empty($phone)) throw new Exception('Masukkan nomor HP');
-            if (empty($email)) throw new Exception('Masukkan email');
+            if (empty($suppliername))
+                throw new Exception('Masukkan nama supplier');
+            if (empty($address))
+                throw new Exception('Masukkan alamat');
+            if (empty($phone))
+                throw new Exception('Masukkan nomor HP');
+            if (empty($email))
+                throw new Exception('Masukkan email');
 
             $data = [
                 'suppliername' => $suppliername,
@@ -204,7 +213,8 @@ class Supplier extends BaseController
         $this->db->transBegin();
         try {
             $row = $this->MSupplier->getOne($userid);
-            if (empty($row)) throw new Exception("User not found!");
+            if (empty($row))
+                throw new Exception("User not found!");
             $this->MSupplier->destroy('id', $userid);
             $res = [
                 'status' => '1',
@@ -223,4 +233,67 @@ class Supplier extends BaseController
         $this->db->transComplete();
         echo json_encode($res);
     }
+
+    public function exportexcel()
+    {
+        $data = $this->MSupplier->getAll();
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Supplier_Data');
+        
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['argb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['argb' => '4CAF50'],
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+            ],
+        ];
+        $dataStyle = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+            ],
+        ];
+        $headers = ['Supplier Name', 'Address', 'Phone', 'Email', 'File Path'];
+        $columns = range('A', 'E');
+
+        foreach ($columns as $key => $column) {
+            $sheet->setCellValue($column . '1', $headers[$key]);
+        }
+        $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
+        $i = 2;
+        foreach ($data as $row) {
+            $sheet->setCellValue('A' . $i, $row['suppliername']);
+            $sheet->setCellValue('B' . $i, $row['address']);
+            $sheet->setCellValue('C' . $i, $row['phone']);
+            $sheet->setCellValue('D' . $i, $row['email']);
+            $sheet->setCellValue('E' . $i, $row['filepath']);
+            $i++;
+        }
+        $sheet->getStyle('A2:E' . ($i - 1))->applyFromArray($dataStyle);
+        foreach ($columns as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'Supplier_Zaevanza_' . date('Ymd') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
+    }
+
+
 }
