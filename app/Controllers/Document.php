@@ -10,6 +10,7 @@ use Exception;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Fpdf\Fpdf;
 
 
 class Document extends BaseController
@@ -304,6 +305,53 @@ class Document extends BaseController
         header('Cache-Control: max-age=0');
     
         $writer->save('php://output');
+    }
+
+
+    public function exportPDF()
+    {
+        // Fetch data from the model
+        $documents = $this->MDocument->findAll();
+    
+        // Create a new instance of FPDF
+        $pdf = new FPDF(); 
+    
+        // Add a page
+        $pdf->AddPage();
+    
+        // Set the title and header format
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(0, 10, "Data Dokumen", 0, 1, 'C');
+        $pdf->Ln(10); // Line break
+    
+        // Table Header
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Cell(10, 8, 'No', 1, 0, 'C');
+        $pdf->Cell(60, 8, 'Documentname', 1, 0, 'C');
+        $pdf->Cell(60, 8, 'Description', 1, 0, 'C');
+        $pdf->Cell(60, 8, 'FilePath', 1, 1, 'C'); // No "Actions" column
+    
+        // Table Data
+        $pdf->SetFont('Arial', '', 10);
+        $no = 1;
+        foreach ($documents as $document) {
+            $pdf->Cell(10, 8, $no++, 1, 0, 'C');
+            $pdf->Cell(60, 8, $document['documentname'], 1, 0, 'C');
+            $pdf->Cell(60, 8, $document['description'], 1, 0, 'C');
+    
+            // Shorten the FilePath if it's too long (e.g., max length 40 characters)
+            $filePath = (strlen($document['filepath']) > 40) ? substr($document['filepath'], 0, 40) . '...' : $document['filepath'];
+    
+            $pdf->Cell(60, 8, $filePath, 1, 1, 'C'); // Display shortened file path
+        }
+    
+        // Set the appropriate headers for PDF download
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="Data_Dokumen_' . date('Ymd_His') . '.pdf"');
+        header('Cache-Control: max-age=0');
+    
+        // Output the PDF as a downloadable file
+        $pdf->Output('D', 'Data_Dokumen_' . date('Ymd_His') . '.pdf');
     }
     
     

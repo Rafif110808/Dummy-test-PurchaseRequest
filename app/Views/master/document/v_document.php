@@ -3,18 +3,26 @@
 <div class="main-content content margin-t-4">
     <div class="card p-x shadow-sm w-100">
         <div class="card-header dflex align-center justify-end">
-            <button class="btn btn-primary dflex align-center" style="margin: 0.5rem;" onclick="return modalForm('Add Category', 'modal-lg', '<?= getURL('document/form') ?>')">
-                <i class="bx bx-plus-circle margin-r-2"></i>
-                <span class="fw-normal fs-7">Add New</span>
-            </button>
+        <div class="button-group">
+    <!-- Add New Button -->
+    <button class="btn btn-primary d-flex align-center" style="margin: 0.5rem;" onclick="return modalForm('Add Category', 'modal-lg', '<?= getURL('document/form') ?>')">
+        <i class="bx bx-plus-circle margin-r-2"></i> <!-- Ikon untuk Add -->
+        <span class="fw-normal fs-7">Add New</span>
+    </button>
 
-            <button class="btn btn-primary" style="margin: 0.5rem;" onclick="window.location.href='<?= base_url('Document/export') ?>'">
-                    Export to Excel
-             </button>
+    <!-- Export to Excel Button -->
+    <button class="btn btn-success d-flex align-center" style="margin: 0.5rem;" onclick="window.location.href='<?= base_url('Document/export') ?>'">
+        <i class="bx bx-spreadsheet margin-r-2"></i> <!-- Ikon untuk Excel -->
+        <span class="fw-normal fs-7">Export to Excel</span>
+    </button>
 
-             <button class="btn btn-primary" style="margin: 0.5rem;" onclick="window.location.href='<?= base_url('Document/export') ?>'">
-                    Export to fpdf
-             </button>
+    <!-- Export to PDF Button -->
+    <button class="btn btn-danger d-flex align-center" style="margin: 0.5rem;" onclick="window.location.href='<?= base_url('Document/exportpdf') ?>'">
+        <i class="bx bx-file margin-r-2"></i> <!-- Ikon untuk PDF -->
+        <span class="fw-normal fs-7">Export to PDF</span>
+    </button>
+</div>
+
         </div>
 
         <div class="table-responsive margin-t-14p">
