@@ -231,7 +231,7 @@
                 </div>
             </div>
             <div class="modal-body">
-                <span class="fw-normal fs-7set text-dark">Are you sure to delete this data ?</span>
+                <span class="fw-normal fs-7set text-dark">Apakah anda yakin akan hapus data ?</span>
                 <div class="plus-message">
 
                 </div>

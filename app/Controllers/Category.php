@@ -359,27 +359,26 @@ class Category extends BaseController
         $pdf->AddPage();
         $pdf->SetFont('Arial', 'B', 12);
     
-    
+        // Set header
         $pdf->Cell(10, 10, 'No', 1);
         $pdf->Cell(50, 10, 'Category Name', 1);
         $pdf->Cell(80, 10, 'Description', 1);
         $pdf->Cell(50, 10, 'Filepath', 1);
         $pdf->Ln();
     
-    
+        // Set data
         $pdf->SetFont('Arial', '', 12);
         $row = 1;
         foreach ($categories as $index => $category) {
             $pdf->Cell(10, 10, $index + 1, 1);
             $pdf->Cell(50, 10, $category['categoryname'], 1);
             $pdf->Cell(80, 10, $category['description'], 1);
-            $pdf->Cell(50, 10, $category['filepath'], 1);
+            $pdf->MultiCell(50, 10, $category['filepath'], 1);
             $pdf->Ln();
         }
     
-      
+        // Output the PDF
         $pdf->Output('D', 'category.pdf');
     }
-    
 
 }
