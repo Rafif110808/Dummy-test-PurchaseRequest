@@ -8,6 +8,10 @@ use App\Models\MCustomer;
 use App\Models\MUser;
 use CodeIgniter\HTTP\ResponseInterface;
 use Exception;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Fpdf\Fpdf;
 
 class Customer extends BaseController
 {
@@ -278,6 +282,115 @@ class Customer extends BaseController
         }
         $this->db->transComplete();
         echo json_encode($res);
+    }
+
+    public function exportExcel()
+    {
+        $customer = $this->customerModel->datatable()->get()->getResultArray();
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'Data Customer')
+            ->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->mergeCells('A1:F1');
+
+        $sheet->setCellValue('A2', 'No')
+            ->setCellValue('B2', 'Foto')
+            ->setCellValue('C2', 'Nama')
+            ->setCellValue('D2', 'Alamat')
+            ->setCellValue('E2', 'Telephone')
+            ->setCellValue('F2', 'Email');
+
+        $sheet->getColumnDimension('A')->setWidth(5);
+        $sheet->getColumnDimension('B')->setWidth(55);
+        $sheet->getColumnDimension('C')->setWidth(30);
+        $sheet->getColumnDimension('D')->setWidth(30);
+        $sheet->getColumnDimension('E')->setWidth(15);
+        $sheet->getColumnDimension('F')->setWidth(30);
+
+        $borderArray = [
+            'borders' => [
+                'top' => ['borderStyle' => Border::BORDER_THIN],
+                'bottom' => ['borderStyle' => Border::BORDER_THIN],
+                'left' => ['borderStyle' => Border::BORDER_THIN],
+                'right' => ['borderStyle' => Border::BORDER_THIN],
+            ]
+        ];
+        $sheet->getStyle('A2:F2')->applyFromArray($borderArray);
+        $sheet->getStyle('A2:F2')->getFont()->setBold(true);
+
+
+        $row = 3;
+        foreach ($customer as $index => $rowData) {
+            $sheet->setCellValue("A$row", $index + 1)
+                ->setCellValue("B$row", $rowData['filepath'])
+                ->setCellValue("C$row", $rowData['customername'])
+                ->setCellValue("D$row", $rowData['address'])
+                ->setCellValue("E$row", $rowData['phone'])
+                ->setCellValue("F$row", $rowData['email']);
+
+            $sheet->getStyle("A$row:F$row")->applyFromArray($borderArray);
+            $row++;
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'data_customer.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function printPDF()
+    {
+        $pdf = new Fpdf();
+        $pdf->AddPage('L'); // Set landscape orientation
+        $pdf->SetFont('Arial', 'B', 12);
+
+        // Header
+        $pdf->Cell(10, 10, 'No', 1, 0, 'C');
+        $pdf->Cell(50, 10, 'Filepath', 1, 0, 'C');
+        $pdf->Cell(50, 10, 'Nama', 1, 0, 'C');
+        $pdf->Cell(80, 10, 'Email', 1, 0, 'C');
+        $pdf->Cell(60, 10, 'Alamat', 1, 0, 'C');
+        $pdf->Cell(40, 10, 'Telepon', 1, 1, 'C');
+
+        $pdf->SetFont('Arial', '', 12);
+        $datas = $this->customerModel->datatable()->get()->getResultArray();
+
+        $no = 1;
+        foreach ($datas as $row) {
+            $pdf->Cell(10, 10, $no++, 1, 0, 'C');
+
+            // Filepath
+            $x = $pdf->GetX();
+            $y = $pdf->GetY();
+            $pdf->MultiCell(50, 10, $row['filepath'], 1, 'L');
+            $pdf->SetXY($x + 50, $y);
+
+            // Nama
+            $x = $pdf->GetX();
+            $pdf->MultiCell(50, 10, $row['customername'], 1, 'L');
+            $pdf->SetXY($x + 50, $y);
+
+            // Email
+            $x = $pdf->GetX();
+            $pdf->MultiCell(80, 10, $row['email'], 1, 'L');
+            $pdf->SetXY($x + 80, $y);
+
+            // Alamat
+            $x = $pdf->GetX();
+            $pdf->MultiCell(60, 10, $row['address'], 1, 'L');
+            $pdf->SetXY($x + 60, $y);
+
+            // Telepon
+            $pdf->Cell(40, 10, $row['phone'], 1, 1, 'L');
+        }
+
+        $pdf->Output('D', 'data_customer.pdf');
+        exit;
     }
 
     public function logOut()
