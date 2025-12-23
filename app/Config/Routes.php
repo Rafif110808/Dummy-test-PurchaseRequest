@@ -104,6 +104,8 @@ $routes->group('product', function ($routes) {
     $routes->add('export', 'Product::exportexcel', $this->noauth);
     $routes->add('pdf', 'Product::Fpdf', $this->noauth);
     $routes->add('delete', 'Product::deleteData', $this->noauth);
+    $routes->add('formImport', 'Product::formImport', $this->noauth);
+    $routes->add('importExcel', 'Product::importExcel', $this->noauth);
 });
 // -------------------------------------------------------->
 // Log Out

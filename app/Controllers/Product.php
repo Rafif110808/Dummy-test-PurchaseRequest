@@ -106,7 +106,7 @@ class Product extends BaseController
             if (!in_array($extension, $allowedExceptions)) {
                 throw new Exception("Invalid file type. Only ");
             }
-            $newName = $filepath->getExtension();
+            $newName = $filepath->getRandomName();
             $filepath->move('upload/product/', $newName);
             $filepath = 'upload/product/' . $newName;
 
@@ -240,11 +240,14 @@ class Product extends BaseController
     }
     public function exportexcel()
     {
+        //memanggil data dari db
         $data = $this->productModel->getAll();
+        //memanggil library/package untuk import excell
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Product_Data');
+        //==== $sheet->setTitle('Product_Data');
 
+        //digunakan untuk mengatur style di excellnya
         $headerStyle = [
             'font' => [
                 'bold' => true,
@@ -267,14 +270,17 @@ class Product extends BaseController
                 ],
             ],
         ];
+        //digunakan untuk menulis header kolom pertama
         $headers = ['product Name', 'category', 'price', 'stock', 'File Path'];
         $columns = range('A', 'E');
 
         foreach ($columns as $key => $column) {
             $sheet->setCellValue($column . '1', $headers[$key]);
         }
+        // untuk memasang style dimana ingin ditempatkan
         $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
         $i = 2;
+        // untuk menulis data yang diambil dari db ke excell
         foreach ($data as $row) {
             $sheet->setCellValue('A' . $i, $row['productname']);
             $sheet->setCellValue('B' . $i, $row['category']);
@@ -283,18 +289,22 @@ class Product extends BaseController
             $sheet->setCellValue('E' . $i, $row['filepath']);
             $i++;
         }
+        // untuk memasang style dimana ingin ditempatkan
         $sheet->getStyle('A2:E' . ($i - 1))->applyFromArray($dataStyle);
         foreach ($columns as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
-
+        //untuk mengirim file excell dari php ke browser tanpa  menyimpan file di server/local
+        // membuat writer excell
         $writer = new Xlsx($spreadsheet);
         $filename = 'Product' . date('dmy') . '.xlsx';
-
+        // untuk memberitahu ke browser itu adalah file excell
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        //memaksa download dengan nama yang ditentukan
         header('Content-Disposition: attachment;filename="' . $filename . '"');
+        //untuk mencegah cache
         header('Cache-Control: max-age=0');
-
+        //output file ke browser
         $writer->save('php://output');
         exit;
     }
@@ -341,5 +351,70 @@ class Product extends BaseController
 
         $pdf->Output('D', 'Product_Data.pdf');
         exit;
+    }
+
+    public function formImport()
+    {
+        $dt['view'] = view('master/product/v_import', []);
+        $dt['csrfToken'] = csrf_hash();
+        echo json_encode($dt);
+    }
+
+
+    function importExcel()
+    {
+        //untuk menangkap data yang dikirim dari front end
+        $datas = json_decode($this->request->getPost('datas'));
+        $res = array();
+        $this->db->transBegin();
+        try {
+            $undfhproduct = 0;
+            $undfhproductarr = [];
+
+            foreach ($datas as $dt) {
+
+                // validasi minimal kolom
+                if (
+                    empty($dt[0]) || // productname
+                    empty($dt[1]) || // category
+                    empty($dt[2]) || // price
+                    !isset($dt[3])   // stock (boleh 0)
+                ) {
+                    //jika terkena validasi maka produk akan tercatat dan akan dikirim ke fe datanya
+                    $undfhproduct++;
+                    $undfhproductarr[] = $dt[0] ?? '-';
+                    continue;
+                }
+
+                // Simpan product
+                $this->productModel->insert([
+                    'productname' => trim($dt[0]),
+                    'category'    => trim($dt[1]),
+                    'price'       => (float) $dt[2],
+                    'stock'       => (int) $dt[3],
+                    'createddate' => date('Y-m-d H:i:s'),
+                    'createdby'   => getSession('userid'),
+                    'updateddate' => date('Y-m-d H:i:s'),
+                    'updatedby'   => getSession('userid'),
+                ]);
+            }
+
+            $res = [
+                'sukses' => '1',
+                'undfhproduct' => $undfhproduct,
+                'undfhproductarr' => $undfhproductarr
+            ];
+            $this->db->transCommit();
+        } catch (Exception $e) {
+            $res = [
+                'sukses' => '0',
+                'err' => $e->getMessage(),
+                'traceString' => $e->getTraceAsString()
+            ];
+            $this->db->transRollback();
+        }
+        $this->db->transComplete();
+        $res['csrfToken'] = csrf_hash();
+        echo json_encode($res);
     }
 }
