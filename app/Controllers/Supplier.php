@@ -70,12 +70,24 @@ class Supplier extends BaseController
             // Validasi input
             if (empty($suppliername))
                 throw new Exception('Masukkan nama supplier');
+            if (!preg_match('/^[a-zA-Z0-9\s\-\(\)\&\.,]+$/', $suppliername)) {
+                throw new Exception("Nama supplier mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - ( ) & . , yang boleh digunakan.");
+            }
             if (empty($address))
                 throw new Exception('Masukkan alamat');
+            if (!preg_match('/^[a-zA-Z0-9\s\-\.,\!]+$/', $address)) {
+                throw new Exception("Alamat mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - . , ! yang boleh digunakan.");
+            }
             if (empty($phone))
                 throw new Exception('Masukkan nomor HP');
+            if (!preg_match('/^[0-9\+\-\s]+$/', $phone)) {
+                throw new Exception("Nomor HP mengandung karakter yang tidak diperbolehkan! Hanya angka, spasi, dan tanda + - yang boleh digunakan.");
+            }
             if (empty($email))
                 throw new Exception('Masukkan email');
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new Exception("Format email tidak valid!");
+            }
 
             $allowedExtensions = ['jpg', 'jpeg', 'png'];
             $extension = $filepath->getExtension();
@@ -128,13 +140,16 @@ class Supplier extends BaseController
             $btn_edit = "<button type='button' class='btn btn-sm btn-warning' onclick=\"modalForm('Update User - " . $db->suppliername . "', 'modal-lg', '" . getURL('supplier/form/' . encrypting($db->id)) . "', {identifier: this})\"><i class='bx bx-edit-alt'></i></button>";
             $btn_hapus = "<button type='button' class='btn btn-sm btn-danger' onclick=\"modalDelete('Delete User - " . $db->suppliername . "', {'link':'" . getURL('supplier/delete') . "', 'id':'" . encrypting($db->id) . "', 'pagetype':'table'})\"><i class='bx bx-trash'></i></button>";
             $btn_print = "<button type='button' class='btn btn-sm btn-info' onclick=\"window.open('" . getURL('supplier/pdf/' . encrypting($db->id)) . "', '_blank')\"><i class='bx bx-printer'></i></button>";
+            $foto_supplier = !empty($db->filepath)
+                ? "<img src='" . htmlspecialchars($db->filepath) . "' alt='foto supplier' width='50' style='border-radius: 50%; object-fit: cover;'>"
+                : "<img( src:'path/to/default.png' alt='foto supplier' width='50' height:'50' style='border-radius:50%; object-fit: cover;'>";
             return [
                 $no,
                 $db->suppliername,
                 $db->address,
                 $db->phone,
                 $db->email,
-                $db->filepath,
+                $foto_supplier,
                 "<div style='display:flex;align-items:center;justify-content:center;'>$btn_edit&nbsp;$btn_hapus&nbsp;$btn_print</div>"
             ];
         });
@@ -343,5 +358,70 @@ class Supplier extends BaseController
 
         $pdf->Output('D', 'Supplier_Data.pdf');
         exit;
+    }
+
+     public function formImport()
+    {
+        $dt['view'] = view('master/product/v_import', []);
+        $dt['csrfToken'] = csrf_hash();
+        echo json_encode($dt);
+    }
+
+
+    function importExcel()
+    {
+        //untuk menangkap data yang dikirim dari front end
+        $datas = json_decode($this->request->getPost('datas'));
+        $res = array();
+        $this->db->transBegin();
+        try {
+            $undfhproduct = 0;
+            $undfhproductarr = [];
+
+            foreach ($datas as $dt) {
+
+                // validasi minimal kolom
+                if (
+                    empty($dt[0]) || // productname
+                    empty($dt[1]) || // category
+                    empty($dt[2]) || // price
+                    !isset($dt[3])   // stock (boleh 0)
+                ) {
+                    //jika terkena validasi maka produk akan tercatat dan akan dikirim ke fe datanya
+                    $undfhproduct++;
+                    $undfhproductarr[] = $dt[0] ?? '-';
+                    continue;
+                }
+
+                // Simpan product
+                $this->productModel->insert([
+                    'productname' => trim($dt[0]),
+                    'category'    => trim($dt[1]),
+                    'price'       => (float) $dt[2],
+                    'stock'       => (int) $dt[3],
+                    'createddate' => date('Y-m-d H:i:s'),
+                    'createdby'   => getSession('userid'),
+                    'updateddate' => date('Y-m-d H:i:s'),
+                    'updatedby'   => getSession('userid'),
+                ]);
+            }
+
+            $res = [
+                'sukses' => '1',
+                'undfhproduct' => $undfhproduct,
+                'undfhproductarr' => $undfhproductarr
+            ];
+            $this->db->transCommit();
+        } catch (Exception $e) {
+            $res = [
+                'sukses' => '0',
+                'err' => $e->getMessage(),
+                'traceString' => $e->getTraceAsString()
+            ];
+            $this->db->transRollback();
+        }
+        $this->db->transComplete();
+        $res['csrfToken'] = csrf_hash();
+        echo json_encode($res);
     }
 }

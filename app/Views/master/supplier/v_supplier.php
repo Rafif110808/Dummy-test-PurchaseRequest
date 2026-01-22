@@ -7,6 +7,10 @@
             <i class="bx bx-plus-circle margin-r-2"></i>
             <span class="fw-normal fs-7">Add New</span>
         </button>
+        <button class="btn btn-primary dflex align-center margin-l-2" onclick="return modalForm('Import Supplier', 'modal-lg', '<?= getURL('supplier/formImport') ?>')">
+                <i class="bx bx-download margin-r-2"></i>
+                <span class="fw-normal fs-7">Import</span>
+            </button>
         <button class="btn btn-success dflex align-center margin-l-2" id="excel" name="excel" onclick="downloadexcel()">
             <i class="bx bx-bookmarks margin-r-2"></i>
             <span class="fw-normal fs-7">Export Excel</span>

@@ -86,8 +86,14 @@ class Document extends BaseController
         $db->transBegin();
         try {
             if (empty($description)) throw new Exception("Masukkan deskripsi");
+            if (!preg_match('/^[a-zA-Z0-9\s\-\(\)\&\.,]+$/', $description)) {
+                throw new Exception("Deskripsi mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - ( ) & . , yang boleh digunakan.");
+            }
             if (!$filepath || !$filepath->isValid()) throw new Exception("Filepath tidak valid!");
             if (empty($documentname)) throw new Exception("Masukkan nama dokumen");
+            if (!preg_match('/^[a-zA-Z0-9\s\-\(\)\&\.,]+$/', $documentname)) {
+                throw new Exception("Nama dokumen mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - ( ) & . , yang boleh digunakan.");
+            }
 
             $allowedExtensions = ['doc', 'docx', 'pdf', 'xlsx'];
             $extension = $filepath->getExtension();
@@ -141,8 +147,13 @@ class Document extends BaseController
     try {
         // Validasi input
         if (empty($description)) throw new Exception("Masukkan deskripsi");
+        if (!preg_match('/^[a-zA-Z0-9\s\-\(\)\&\.,]+$/', $description)) {
+            throw new Exception("Deskripsi mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - ( ) & . , yang boleh digunakan.");
+        }
         if (empty($documentname)) throw new Exception("Masukkan nama dokumen");
-
+        if (!preg_match('/^[a-zA-Z0-9\s\-\(\)\&\.,]+$/', $documentname)) {
+            throw new Exception("Nama dokumen mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - ( ) & . , yang boleh digunakan.");
+        }   
         // Ambil data dokumen lama berdasarkan user ID
         $oldDocument = $this->MDocument->getOne($userid);
         if (!$oldDocument) throw new Exception("Dokumen tidak ditemukan untuk ID tersebut");
@@ -354,5 +365,69 @@ class Document extends BaseController
         $pdf->Output('D', 'Data_Dokumen_' . date('Ymd_His') . '.pdf');
     }
     
+    public function formImport()
+    {
+        $dt['view'] = view('master/product/v_import', []);
+        $dt['csrfToken'] = csrf_hash();
+        echo json_encode($dt);
+    }
+
+
+    function importExcel()
+    {
+        //untuk menangkap data yang dikirim dari front end
+        $datas = json_decode($this->request->getPost('datas'));
+        $res = array();
+        $this->db->transBegin();
+        try {
+            $undfhproduct = 0;
+            $undfhproductarr = [];
+
+            foreach ($datas as $dt) {
+
+                // validasi minimal kolom
+                if (
+                    empty($dt[0]) || // productname
+                    empty($dt[1]) || // category
+                    empty($dt[2]) || // price
+                    !isset($dt[3])   // stock (boleh 0)
+                ) {
+                    //jika terkena validasi maka produk akan tercatat dan akan dikirim ke fe datanya
+                    $undfhproduct++;
+                    $undfhproductarr[] = $dt[0] ?? '-';
+                    continue;
+                }
+
+                // Simpan product
+                $this->productModel->insert([
+                    'productname' => trim($dt[0]),
+                    'category'    => trim($dt[1]),
+                    'price'       => (float) $dt[2],
+                    'stock'       => (int) $dt[3],
+                    'createddate' => date('Y-m-d H:i:s'),
+                    'createdby'   => getSession('userid'),
+                    'updateddate' => date('Y-m-d H:i:s'),
+                    'updatedby'   => getSession('userid'),
+                ]);
+            }
+
+            $res = [
+                'sukses' => '1',
+                'undfhproduct' => $undfhproduct,
+                'undfhproductarr' => $undfhproductarr
+            ];
+            $this->db->transCommit();
+        } catch (Exception $e) {
+            $res = [
+                'sukses' => '0',
+                'err' => $e->getMessage(),
+                'traceString' => $e->getTraceAsString()
+            ];
+            $this->db->transRollback();
+        }
+        $this->db->transComplete();
+        $res['csrfToken'] = csrf_hash();
+        echo json_encode($res);
+    }
     
 }

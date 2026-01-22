@@ -103,8 +103,14 @@ class Project extends BaseController
         try {
             if (empty($projectname))
                 throw new Exception("Project Name is required!");
+            if (!preg_match('/^[a-zA-Z0-9\s\-\(\)\&\.,]+$/', $projectname)) {
+                throw new Exception("Project Name contains invalid characters! Only letters, numbers, spaces, and - ( ) & . , are allowed.");
+            }
             if (empty($description))
                 throw new Exception("Description is required!");
+            if (!preg_match('/^[a-zA-Z0-9\s\-\.,\!]+$/', $description)) {
+                throw new Exception("Description contains invalid characters! Only letters, numbers, spaces, and - . , ! are allowed.");
+            }
             if (empty($startdate))
                 throw new Exception("Start Date is required!");
             if (empty($enddate))
@@ -117,9 +123,9 @@ class Project extends BaseController
             if (!in_array($extension, $allowedExceptions)) {
                 throw new Exception("Invalid file type. Only ");
             }
-            $newName = $filepath->getExtension();
-            $filepath->move('upload/project/', $newName);
-            $filepath = 'upload/project/' . $newName;
+            $newName = $filepath->getRandomName();
+            $filepath->move('uploads/project/', $newName);
+            $filepath = 'uploads/project/' . $newName;
 
             $this->projectModel->store([
                 'projectname' => $projectname,
@@ -163,8 +169,14 @@ class Project extends BaseController
         try {
             if (empty($projectname))
                 throw new Exception("Project Name is required!");
+            if (!preg_match('/^[a-zA-Z0-9\s\-\(\)\&\.,]+$/', $projectname)) {
+                throw new Exception("Project Name mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - ( ) & . , yang boleh digunakan.");
+            }
             if (empty($description))
                 throw new Exception("Description is required!");
+            if (!preg_match('/^[a-zA-Z0-9\s\-\.,\!]+$/', $description)) {
+                throw new Exception("Description contains invalid characters! Only letters, numbers, spaces, and - . , ! are allowed.");
+            }
             if (empty($startdate))
                 throw new Exception("Start Date is required!");
             if (empty($enddate))
@@ -359,5 +371,69 @@ class Project extends BaseController
     // Output the PDF to the browser for download
     $pdf->Output('D', 'projects.pdf');
 }
+    public function formImport()
+    {
+        $dt['view'] = view('master/product/v_import', []);
+        $dt['csrfToken'] = csrf_hash();
+        echo json_encode($dt);
+    }
+
+
+    function importExcel()
+    {
+        //untuk menangkap data yang dikirim dari front end
+        $datas = json_decode($this->request->getPost('datas'));
+        $res = array();
+        $this->db->transBegin();
+        try {
+            $undfhproduct = 0;
+            $undfhproductarr = [];
+
+            foreach ($datas as $dt) {
+
+                // validasi minimal kolom
+                if (
+                    empty($dt[0]) || // productname
+                    empty($dt[1]) || // category
+                    empty($dt[2]) || // price
+                    !isset($dt[3])   // stock (boleh 0)
+                ) {
+                    //jika terkena validasi maka produk akan tercatat dan akan dikirim ke fe datanya
+                    $undfhproduct++;
+                    $undfhproductarr[] = $dt[0] ?? '-';
+                    continue;
+                }
+
+                // Simpan product
+                $this->productModel->insert([
+                    'productname' => trim($dt[0]),
+                    'category'    => trim($dt[1]),
+                    'price'       => (float) $dt[2],
+                    'stock'       => (int) $dt[3],
+                    'createddate' => date('Y-m-d H:i:s'),
+                    'createdby'   => getSession('userid'),
+                    'updateddate' => date('Y-m-d H:i:s'),
+                    'updatedby'   => getSession('userid'),
+                ]);
+            }
+
+            $res = [
+                'sukses' => '1',
+                'undfhproduct' => $undfhproduct,
+                'undfhproductarr' => $undfhproductarr
+            ];
+            $this->db->transCommit();
+        } catch (Exception $e) {
+            $res = [
+                'sukses' => '0',
+                'err' => $e->getMessage(),
+                'traceString' => $e->getTraceAsString()
+            ];
+            $this->db->transRollback();
+        }
+        $this->db->transComplete();
+        $res['csrfToken'] = csrf_hash();
+        echo json_encode($res);
+    }
 
 }

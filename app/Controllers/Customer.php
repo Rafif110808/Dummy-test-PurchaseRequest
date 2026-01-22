@@ -134,10 +134,26 @@ class Customer extends BaseController
         $this->customerModel->transBegin();
         try {
             if (!$foto->isValid()) throw new Exception("Foto tidak valid!");
+            
             if (empty($nama)) throw new Exception("Nama dibutuhkan!");
+            if ( !preg_match('/^[a-zA-Z0-9\s\-\(\)\&\.,]+$/', $nama)) {
+                throw new Exception("Nama mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - ( ) & . , yang boleh digunakan.");
+            } 
+
             if (empty($alamat)) throw new Exception("Alamat masih kosong!");
+            if ( !preg_match('/^[a-zA-Z0-9\s\-\.,\!]+$/', $alamat)) {
+                throw new Exception("Alamat mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - . , ! yang boleh digunakan.");
+            }
+
             if (empty($telepon)) throw new Exception("Telephone masih kosong!");
+            if ( !preg_match('/^[0-9\+\-\s]+$/', $telepon)) {
+                throw new Exception("Nomor Telephone mengandung karakter yang tidak diperbolehkan! Hanya angka, spasi, dan tanda + - yang boleh digunakan.");
+            }
+
             if (empty($email)) throw new Exception("Email masih kosong!");
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new Exception("Format email tidak valid!");
+            }
 
             // Validasi ekstensi file
             $allowedExtensions = ['jpg', 'jpeg', 'png'];
@@ -197,9 +213,21 @@ class Customer extends BaseController
         try {
             if (empty($customerid)) throw new Exception("ID customer tidak ditemukan!");
             if (empty($nama)) throw new Exception("Nama masih kosong!");
+            if ( !preg_match('/^[a-zA-Z0-9\s\-\(\)\&\.,]+$/', $nama)) {
+                throw new Exception("Nama mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - ( ) & . , yang boleh digunakan.");
+            }
             if (empty($alamat)) throw new Exception("Alamat masih kosong!");
+            if ( !preg_match('/^[a-zA-Z0-9\s\-\.,\!]+$/', $alamat)) {
+                throw new Exception("Alamat mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - . , ! yang boleh digunakan.");
+            }
             if (empty($telepon)) throw new Exception("Telepon masih kosong!");
+            if ( !preg_match('/^[0-9\+\-\s]+$/', $telepon)) {
+                throw new Exception("Nomor Telephone mengandung karakter yang tidak diperbolehkan! Hanya angka, spasi, dan tanda + - yang boleh digunakan.");
+            }
             if (empty($email)) throw new Exception("Email masih kosong!");
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new Exception("Format email tidak valid!");
+            }
 
             $data = [
                 'customername' => $nama,
@@ -391,6 +419,71 @@ class Customer extends BaseController
 
         $pdf->Output('D', 'data_customer.pdf');
         exit;
+    }
+
+        public function formImport()
+    {
+        $dt['view'] = view('master/product/v_import', []);
+        $dt['csrfToken'] = csrf_hash();
+        echo json_encode($dt);
+    }
+
+
+    function importExcel()
+    {
+        //untuk menangkap data yang dikirim dari front end
+        $datas = json_decode($this->request->getPost('datas'));
+        $res = array();
+        $this->db->transBegin();
+        try {
+            $undfhproduct = 0;
+            $undfhproductarr = [];
+
+            foreach ($datas as $dt) {
+
+                // validasi minimal kolom
+                if (
+                    empty($dt[0]) || // productname
+                    empty($dt[1]) || // category
+                    empty($dt[2]) || // price
+                    !isset($dt[3])   // stock (boleh 0)
+                ) {
+                    //jika terkena validasi maka produk akan tercatat dan akan dikirim ke fe datanya
+                    $undfhproduct++;
+                    $undfhproductarr[] = $dt[0] ?? '-';
+                    continue;
+                }
+
+                // Simpan product
+                $this->productModel->insert([
+                    'productname' => trim($dt[0]),
+                    'category'    => trim($dt[1]),
+                    'price'       => (float) $dt[2],
+                    'stock'       => (int) $dt[3],
+                    'createddate' => date('Y-m-d H:i:s'),
+                    'createdby'   => getSession('userid'),
+                    'updateddate' => date('Y-m-d H:i:s'),
+                    'updatedby'   => getSession('userid'),
+                ]);
+            }
+
+            $res = [
+                'sukses' => '1',
+                'undfhproduct' => $undfhproduct,
+                'undfhproductarr' => $undfhproductarr
+            ];
+            $this->db->transCommit();
+        } catch (Exception $e) {
+            $res = [
+                'sukses' => '0',
+                'err' => $e->getMessage(),
+                'traceString' => $e->getTraceAsString()
+            ];
+            $this->db->transRollback();
+        }
+        $this->db->transComplete();
+        $res['csrfToken'] = csrf_hash();
+        echo json_encode($res);
     }
 
     public function logOut()

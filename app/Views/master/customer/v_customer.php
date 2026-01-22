@@ -1,3 +1,4 @@
+
 <?= $this->include('template/v_header') ?>
 <?= $this->include('template/v_appbar') ?>
 <div class="main-content content margin-t-4">
@@ -10,6 +11,10 @@
             <button class="btn btn-primary d-flex align-center" onclick="return modalForm('Tambah Customer', 'modal-lg', '<?= getURL('customer/form') ?>')">
                 <i class="bx bx-plus-circle margin-r-2"></i>
                 <span class="fw-normal fs-7">Add New</span>
+            </button>
+              <button class="btn btn-primary dflex align-center margin-l-2" onclick="return modalForm('Import Customer', 'modal-lg', '<?= getURL('customer/formImport') ?>')">
+                <i class="bx bx-download margin-r-2"></i>
+                <span class="fw-normal fs-7">Import</span>
             </button>
             <button class="btn btn-primary d-flex align-center margin-l-2" onclick="exportExcel()">
                 <i class="bx bx-download margin-r-2"></i>

@@ -4,7 +4,7 @@
 <input type="hidden" id="csrf_token" value="<?= base_encode(csrf_hash()) ?>">
 <input type="hidden" id="list_dtids" value="">
 </body>
-<script src="<?= getURL('public/js/ckeditor5.js') ?>"></script>
+<script src="<?= base_url('public/js/ckeditor5.js') ?>"></script>
 <!-- Modal Preview -->
 <div class="modal fade" id="modalprev" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="modalprevLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -139,7 +139,7 @@
                     <div class="col-4">
                         <div class="dflex align-center justify-center">
                             <div style="width: 90%;height:250px;padding:4px;margin-block:4px;border:1px solid rgba(108, 108, 108, 0.25)">
-                                <img src="<?= getURL('public/images/blank.jpg') ?>" loading="lazy" alt="preview" id="preview-alt" style="width: 100%;height:100%;object-fit:contain;">
+                                <img src="<?= base_url('public/images/blank.jpg') ?>" loading="lazy" alt="preview" id="preview-alt" style="width: 100%;height:100%;object-fit:contain;">
                             </div>
                         </div>
                         <div class="dflex align-center justify-center">

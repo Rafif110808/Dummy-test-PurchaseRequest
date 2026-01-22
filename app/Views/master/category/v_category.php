@@ -12,6 +12,10 @@
                     <i class="bx bx-export margin-r-2"></i>
                     <span class="fw-normal fs-7">Export to PDF</span>
                 </button>
+                <button class="btn btn-primary dflex align-center margin-l-2" onclick="return modalForm('Import Category', 'modal-lg', '<?= getURL('category/formImport') ?>')">
+                    <i class="bx bx-download margin-r-2"></i>
+                    <span class="fw-normal fs-7">Import</span>
+                </button>
             </div>
             <button class="btn btn-primary dflex align-center" onclick="return modalForm('Add Category', 'modal-lg', '<?= getURL('category/form') ?>')">
                 <i class="bx bx-plus-circle margin-r-2"></i>

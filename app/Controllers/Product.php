@@ -47,7 +47,7 @@ class Product extends BaseController
             $btn_hapus = "<button type='button' class='btn btn-sm btn-danger' onclick=\"modalDelete('Delete Product - " . $db->productname . "', {'link':'" . getURL('product/delete') . "', 'id':'" . encrypting($db->id) . "', 'pagetype':'table'})\"><i class='bx bx-trash'></i></button>";
 
             $foto_product = !empty($db->filepath)
-                ? "<img src='" . htmlspecialchars($db->filepath) .  "' alt='foto product' width='50' style='border-radius: 50%; object-fit: cover;'>"
+                ? "<img src='" . htmlspecialchars($db->filepath) . "' alt='foto product' width='50' style='border-radius: 50%; object-fit: cover;'>"
                 : "<img( src:'path/to/default.png' alt='foto product' width='50' height:'50' style='border-radius:50%; object-fit: cover;'>";
             return [
                 $no,
@@ -95,11 +95,24 @@ class Product extends BaseController
 
         $this->db->transBegin();
         try {
-            if (empty($productname)) throw new Exception("Product is required!");
-            if (empty($category)) throw new Exception("category is required!");
-            if (empty($price)) throw new Exception("price is required!");
-            if (empty($stock)) throw new Exception("stokc is required!");
-            if (empty($filepath->isValid())) throw new Exception("img is required!");
+            if (empty($productname))
+                throw new Exception("Product is required!");
+            if (!preg_match('/^[a-zA-Z0-9\s\-\(\)\&\.,]+$/', $productname)) {
+                throw new Exception("Nama produk mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - ( ) & . , yang boleh digunakan.");
+            }
+
+            if (empty($category))
+                throw new Exception("category is required!");
+            if (!preg_match('/^[a-zA-Z0-9\s\-\&\/]+$/', $category)) {
+                throw new Exception("Kategori mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, - & / yang boleh.");
+            }
+
+            if (empty($price))
+                throw new Exception("price is required!");
+            if (empty($stock))
+                throw new Exception("stokc is required!");
+            if (empty($filepath->isValid()))
+                throw new Exception("img is required!");
 
             $allowedExceptions = ['jpg', 'jpeg', 'png'];
             $extension = $filepath->getExtension();
@@ -151,14 +164,26 @@ class Product extends BaseController
         $this->db->transBegin();
         try {
             // Validasi data yang diperlukan
-            if (empty($productname)) throw new Exception("Product Name is required!");
-            if (empty($category)) throw new Exception("Category is required!");
-            if (empty($price)) throw new Exception("Price is required!");
-            if (empty($stock)) throw new Exception("Stock is required!");
+            if (empty($productname))
+                throw new Exception("Product Name is required!");
+            if (!preg_match('/^[a-zA-Z0-9\s\-\(\)\&\.,]+$/', $productname)) {
+                throw new Exception("Nama produk mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, dan tanda - ( ) & . , yang boleh digunakan.");
+            }
+
+            if (empty($category))
+                throw new Exception("Category is required!");
+            if (!preg_match('/^[a-zA-Z0-9\s\-\&\/]+$/', $category)) {
+                throw new Exception("Kategori mengandung karakter yang tidak diperbolehkan! Hanya huruf, angka, spasi, - & / yang boleh.");
+            }
+            if (empty($price))
+                throw new Exception("Price is required!");
+            if (empty($stock))
+                throw new Exception("Stock is required!");
 
             // Ambil data produk lama untuk mendapatkan gambar sebelumnya
             $oldData = $this->productModel->getOne($productid);
-            if (empty($oldData)) throw new Exception("Product not found!");
+            if (empty($oldData))
+                throw new Exception("Product not found!");
 
             // Jika file baru diunggah, validasi file tersebut
             $newFilePath = $oldData['filepath']; // Default ke filepath lama
@@ -218,7 +243,8 @@ class Product extends BaseController
         $this->db->transBegin();
         try {
             $row = $this->productModel->getOne($productId);
-            if (empty($row)) throw new Exception("Product not found!");
+            if (empty($row))
+                throw new Exception("Product not found!");
 
             $this->productModel->destroy('id', $productId);
 
@@ -389,13 +415,13 @@ class Product extends BaseController
                 // Simpan product
                 $this->productModel->insert([
                     'productname' => trim($dt[0]),
-                    'category'    => trim($dt[1]),
-                    'price'       => (float) $dt[2],
-                    'stock'       => (int) $dt[3],
+                    'category' => trim($dt[1]),
+                    'price' => (float) $dt[2],
+                    'stock' => (int) $dt[3],
                     'createddate' => date('Y-m-d H:i:s'),
-                    'createdby'   => getSession('userid'),
+                    'createdby' => getSession('userid'),
                     'updateddate' => date('Y-m-d H:i:s'),
-                    'updatedby'   => getSession('userid'),
+                    'updatedby' => getSession('userid'),
                 ]);
             }
 

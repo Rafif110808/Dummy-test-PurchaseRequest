@@ -16,7 +16,8 @@
                 <!-- <h5>Serenity Logo</h5> -->
                 <div class="text-center" style="display:flex;flex-direction:column;align-items: center;">
                     <div style="width:max-content;height: max-content;position:relative;">
-                        <img src="<?= getAvatar(getSession('userid')) ?>" class="side-avatar" alt="side-avatar" loading="lazy">
+                        <img src="<?= getAvatar(getSession('userid')) ?>" class="side-avatar" alt="side-avatar"
+                            loading="lazy">
                         <div class="float-profile" style="position: absolute;left:-5px;top:0px;">
                             <!-- <button class="btn btn-warning dflex align-center" style="border-radius: 50% !important;" onclick="return toPage('<?= getURL('myprofile') ?>')">
                                 <i class="bx bx-edit-alt float-icon fs-6set"></i>
@@ -76,8 +77,18 @@
                     <span class='fw-normal fs-7'>Customer</span>
                 </div>
             </a>
+
+
+            <a href='<?= getURL('purchase-request') ?>' class='no-parent'>
+                <div class='sidebar-item'>
+                    <i class='bx bx-receipt'></i>
+                    <span class='fw-normal fs-7'>Purchase Request</span>
+                </div>
+            </a>
+
         </div>
-        <button class=" btn btn-primary dflex align-center w-100 btn-logout" onclick="return toPage('<?= getURL('logout') ?>')" style="display: none;">
+        <button class=" btn btn-primary dflex align-center w-100 btn-logout"
+            onclick="return toPage('<?= getURL('logout') ?>')" style="display: none;">
             <i class="bx bx-log-out margin-r-3"></i>
             <span class="fw-normal fs-7">Log Out</span>
         </button>
