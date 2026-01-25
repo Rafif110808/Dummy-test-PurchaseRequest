@@ -192,8 +192,7 @@
                 $btn.prop('disabled', true).html('<i class="bx bx-loader-alt bx-spin"></i> Saving...');
 
                 const url = '<?= ($form_type == 'edit' ? getURL('purchase-request/update') : getURL('purchase-request/add')) ?>';
-                // Close modal immediately after submit to avoid UI stall (Revision 1)
-                $('#modalAdd').modal('hide');
+                // Do not auto-close here; close on successful server response (Revision 1)
 
                 $.ajax({
                     url: url,
@@ -204,9 +203,16 @@
                         $btn.prop('disabled', false).html('<i class="bx bx-check"></i> <?= ($form_type == 'edit' ? 'Update' : 'Save') ?>');
 
                         if (res.sukses == 1) {
-                            $('#modalAdd').modal('hide');
+                            // Do not auto-close modal (customer-like behavior). Keep modal open for quick adds.
+                            // Reset header form fields for clean state on next add
+                            $('#form-purchaserequest')[0].reset();
+                            // Reset transdate to today and ensure date input shows current day
+                            const todayStr = new Date().toISOString().slice(0, 10);
+                            $('#transdate').val(todayStr);
+                            // Clear supplier select2
+                            $('#supplierid').val('').trigger('change');
 
-                            // Reload main table
+                            // Reload main table to show the new entry
                             if (typeof purchaseRequestTable !== 'undefined') {
                                 purchaseRequestTable.ajax.reload(null, false);
                             } else {
