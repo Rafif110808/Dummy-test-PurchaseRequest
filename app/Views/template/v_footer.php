@@ -993,7 +993,7 @@
     function initializeEditor() {
         const editorElement = document.querySelector('#editor');
         if (!editorElement) {
-            console.warn('Editor element with ID "editor" not found.');
+            // Silent return to prevent errors from blocking other functionality
             return;
         }
 

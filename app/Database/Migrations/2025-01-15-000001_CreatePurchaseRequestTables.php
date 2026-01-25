@@ -41,11 +41,11 @@ class CreatePurchaseRequestTables extends Migration
             ],
             'updatedby' => [
                 'type' => 'INT',
-                'null' => true,
-            ],
+                'null' => false,
+                ],
             'updateddate' => [
                 'type' => 'TIMESTAMP',
-                'null' => true,
+                'null' => false,
             ],
             'isactive' => [
                 'type' => 'BOOLEAN',
@@ -88,11 +88,11 @@ class CreatePurchaseRequestTables extends Migration
             ],
             'updatedby' => [
                 'type' => 'INT',
-                'null' => true,
+                'null' => false,
             ],
             'updateddate' => [
                 'type' => 'TIMESTAMP',
-                'null' => true,
+                'null' => false,
             ],
             'isactive' => [
                 'type' => 'BOOLEAN',

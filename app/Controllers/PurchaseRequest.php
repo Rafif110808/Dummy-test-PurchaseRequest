@@ -42,7 +42,7 @@ class PurchaseRequest extends BaseController
         $table = Datatables::method([MPurchaseRequestHd::class, 'datatable'], 'searchable')->make();
         $table->updateRow(function ($db, $no) {
             $btn_edit = "<button class='btn btn-sm btn-warning' onclick=\"modalForm('Edit Purchase Request', 'modal-lg', '" . getURL('purchase-request/form/' . encrypting($db->id)) . "', {identifier:this})\" data-id='" . encrypting($db->id) . "'><i class='bx bx-edit-alt'></i></button>";
-            $btn_hapus = "<button class='btn btn-sm btn-danger btn-delete-pr'data-id='" . encrypting($db->id) . "'data-url='" . getURL('purchase-request/delete') . "'><i class='bx bx-trash'></i></button>";
+            $btn_hapus = "<button class='btn btn-sm btn-danger btn-delete-pr' data-id='" . encrypting($db->id) . "' data-url='" . getURL('purchase-request/delete') . "' data-transcode='" . $db->transcode . "'><i class='bx bx-trash'></i></button>";
 
             return [
                 $no,
@@ -55,8 +55,6 @@ class PurchaseRequest extends BaseController
         });
         return $table->toJson();
     }
-
-    
 
     /**
      * Show form for add/edit Purchase Request
@@ -148,6 +146,9 @@ class PurchaseRequest extends BaseController
                 'description' => $description,
                 'createdby' => getSession('userid'),
                 'createddate' => date('Y-m-d H:i:s'),
+                // Update audit fields on create to satisfy NOT NULL constraint
+                'updatedby' => getSession('userid'),
+                'updateddate' => date('Y-m-d H:i:s'),
                 'isactive' => true
             ];
             $headerId = $this->mHeader->store($headerData);
@@ -170,6 +171,9 @@ class PurchaseRequest extends BaseController
                         'qty' => (float) $row['qty'],
                         'createdby' => getSession('userid'),
                         'createddate' => date('Y-m-d H:i:s'),
+                        // Update audit fields on create
+                        'updatedby' => getSession('userid'),
+                        'updateddate' => date('Y-m-d H:i:s'),
                         'isactive' => true
                     ];
                 }
@@ -239,7 +243,7 @@ class PurchaseRequest extends BaseController
                 throw new Exception('Transcode sudah terdaftar');
             }
 
-            // Update header
+            // Update header with audit fields (TIDAK BOLEH KOSONG)
             $headerData = [
                 'transcode' => $transcode,
                 'transdate' => $transdate,
@@ -312,6 +316,8 @@ class PurchaseRequest extends BaseController
 
         echo json_encode($res);
     }
+
+
 
     /**
      * Store method - Auto detect add or update
@@ -496,6 +502,8 @@ class PurchaseRequest extends BaseController
     public function addDetail()
     {
         $res = [];
+        $this->db->transBegin();
+
         try {
             $headerId = decrypting($this->request->getPost('headerId'));
             $productId = $this->request->getPost('productId');
@@ -505,6 +513,12 @@ class PurchaseRequest extends BaseController
             // Validasi
             if (empty($headerId) || empty($productId) || empty($qty)) {
                 throw new Exception('Header ID, Product dan Qty wajib diisi');
+            }
+
+            // Check if header exists and is active
+            $header = $this->mHeader->getOne($headerId);
+            if (empty($header)) {
+                throw new Exception('Purchase Request tidak ditemukan');
             }
 
             $data = [
@@ -523,12 +537,14 @@ class PurchaseRequest extends BaseController
                 throw new Exception('Gagal menambahkan detail');
             }
 
+            $this->db->transCommit();
             $res = [
                 'sukses' => 1,
                 'pesan' => 'Detail berhasil ditambahkan',
                 'csrfToken' => csrf_hash()
             ];
         } catch (Exception $e) {
+            $this->db->transRollback();
             $res = [
                 'sukses' => 0,
                 'pesan' => $e->getMessage(),
@@ -545,8 +561,11 @@ class PurchaseRequest extends BaseController
     public function updateDetail()
     {
         $res = [];
+        $this->db->transBegin();
+
         try {
-            $id = $this->request->getPost('id');
+            // Use encrypted ID from client (consistent with header delete)
+            $id = decrypting($this->request->getPost('id'));
             $productId = $this->request->getPost('productId');
             $uomId = $this->request->getPost('uomId');
             $qty = $this->request->getPost('qty');
@@ -554,6 +573,20 @@ class PurchaseRequest extends BaseController
             // Validasi
             if (empty($id) || empty($productId) || empty($qty)) {
                 throw new Exception('ID, Product dan Qty wajib diisi');
+            }
+
+            // Check if detail exists
+            $detail = $this->mDetail->getOne($id);
+            if (empty($detail)) {
+                // Detail may have been already deleted; treat as success for idempotence
+                $this->db->transCommit();
+                $res = [
+                    'sukses' => 1,
+                    'pesan' => 'Detail tidak ditemukan, tidak ada perubahan',
+                    'csrfToken' => csrf_hash()
+                ];
+                echo json_encode($res);
+                return;
             }
 
             $data = [
@@ -570,12 +603,14 @@ class PurchaseRequest extends BaseController
                 throw new Exception('Gagal mengupdate detail');
             }
 
+            $this->db->transCommit();
             $res = [
                 'sukses' => 1,
                 'pesan' => 'Detail berhasil diupdate',
                 'csrfToken' => csrf_hash()
             ];
         } catch (Exception $e) {
+            $this->db->transRollback();
             $res = [
                 'sukses' => 0,
                 'pesan' => $e->getMessage(),
@@ -592,11 +627,27 @@ class PurchaseRequest extends BaseController
     public function deleteDetail()
     {
         $res = [];
+        $this->db->transBegin();
+
         try {
-            $id = $this->request->getPost('id');
+            $id = decrypting($this->request->getPost('id'));
 
             if (empty($id)) {
                 throw new Exception('ID tidak valid');
+            }
+
+            // Check if detail exists
+            $detail = $this->mDetail->getOne($id);
+            if (empty($detail)) {
+                // If detail already deleted, treat as success to keep idempotent
+                $this->db->transCommit();
+                $res = [
+                    'sukses' => 1,
+                    'pesan' => 'Detail tidak ditemukan, tidak ada perubahan',
+                    'csrfToken' => csrf_hash()
+                ];
+                echo json_encode($res);
+                return;
             }
 
             $deleted = $this->mDetail->destroy($id);
@@ -605,12 +656,14 @@ class PurchaseRequest extends BaseController
                 throw new Exception('Gagal menghapus detail');
             }
 
+            $this->db->transCommit();
             $res = [
                 'sukses' => 1,
                 'pesan' => 'Detail berhasil dihapus',
                 'csrfToken' => csrf_hash()
             ];
         } catch (Exception $e) {
+            $this->db->transRollback();
             $res = [
                 'sukses' => 0,
                 'pesan' => $e->getMessage(),

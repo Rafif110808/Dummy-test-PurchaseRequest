@@ -44,13 +44,12 @@ class Drivers
                                     : $query->orWhere($dbcolumn->raw($field, $dbcolumn->format($searchValue)));
                             } else if ($dbcolumn->isCallableQuery()) {
                                 $query = $dbcolumn->query($query, $dbcolumn->field($field), $dbcolumn->format($searchValue));
-                            } else {
-                                $index == 0
-                                    // ? $query->like("lower(" . $dbcolumn->field($field) . ")", $dbcolumn->format($searchValue))
-                                    // : $query->orLike("lower(" . $dbcolumn->field($field) . ")", $dbcolumn->format($searchValue));
-                                    ? $query->like("lower (CAST(" . $dbcolumn->field($field) . " AS VARCHAR))", $dbcolumn->format(strtolower($searchValue))) 
-                                    : $query->orLike ("lower (CAST(". $dbcolumn->field($field) . " AS VARCHAR))", $dbcolumn->format(strtolower($searchValue)));
-                            }
+                             } else {
+                                 // PostgreSQL 17 Compatible: Use ::TEXT cast instead of CAST AS VARCHAR
+                                 $index == 0
+                                     ? $query->like("LOWER(" . $dbcolumn->field($field) . "::TEXT)", $dbcolumn->format(strtolower($searchValue)))
+                                     : $query->orLike("LOWER(" . $dbcolumn->field($field) . "::TEXT)", $dbcolumn->format(strtolower($searchValue)));
+                             }
 
                             $index++;
                         }

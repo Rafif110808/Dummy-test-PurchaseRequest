@@ -115,34 +115,43 @@
         }
     }
 
+    // Header delete - use modal confirmation (server-side)
     $(document).on('click', '.btn-delete-pr', function () {
         const id = $(this).data('id');
-        const url = $(this).data('url');
+        const transcode = $(this).data('transcode');
+        // Use modalDelete to confirm deletion
+        modalDelete('Delete Purchase Request - ' + transcode, {
+            id: id,
+            custom_handler: 'confirmDeletePR'
+        });
+    });
 
-        if (!confirm('Yakin ingin menghapus Purchase Request ini?')) {
-            return;
-        }
-
+    // Global handler invoked by modalDelete for header deletion
+    window.confirmDeletePR = function(data) {
         $.ajax({
-            url: url,
+            url: '<?= getURL('purchase-request/delete') ?>',
             type: 'POST',
-            data: {
-                id: id,
-                csrf_token_name: '<?= csrf_hash() ?>'
-            },
             dataType: 'json',
-            success: function (res) {
+            data: {
+                id: data.id,
+                <?= csrf_token() ?>: $('#csrf_token_form').val()
+            },
+            success: function(res) {
+                $('#modaldel').modal('hide');
                 if (res.sukses == 1) {
+                    if (typeof purchaseRequestTable !== 'undefined') {
+                        purchaseRequestTable.ajax.reload(null, false);
+                    }
                     showNotif('success', res.pesan);
-                    purchaseRequestTable.ajax.reload(null, false);
                 } else {
                     showNotif('error', res.pesan);
                 }
             },
-            error: function () {
-                showNotif('error', 'Gagal menghapus data');
+            error: function(xhr) {
+                $('#modaldel').modal('hide');
+                showNotif('error', 'Delete failed: ' + xhr.responseText);
             }
         });
-    });
+    };
 
 </script>

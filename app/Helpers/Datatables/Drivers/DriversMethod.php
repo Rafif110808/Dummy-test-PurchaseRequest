@@ -67,13 +67,26 @@ class DriversMethod extends Drivers
 
         $this->query = $queryData->get();
 
-        $this->queryTotal = call_user_func_array($this->callable, $this->params)
-            ->countAllResults();
+        // Get base query builder (includes JOINs)
+        $baseQuery = call_user_func_array($this->callable, $this->params);
+
+        try {
+            $this->queryTotal = $baseQuery->countAllResults();
+        } catch (\Exception $e) {
+            log_message('error', 'Datatables total count failed: ' . $e->getMessage());
+            $this->queryTotal = 0;
+        }
 
         $this->querySearch = $this->queryTotal;
         if ($this->request->search()->isNotEmpty() && $this->request->getDatabaseColumns()->count() > 0) {
-            $this->querySearch = $this->filter(call_user_func_array($this->callable, $this->params))
-                ->countAllResults();
+            try {
+                // Use the same base query with JOINs for search filtering
+                $this->querySearch = $this->filter($baseQuery)->countAllResults();
+            } catch (\Exception $e) {
+                log_message('error', 'Datatables search failed: ' . $e->getMessage());
+                // Fallback to total count if search fails
+                $this->querySearch = $this->queryTotal;
+            }
         }
 
         return new Response($this->queryTotal, $this->query, $this->querySearch);

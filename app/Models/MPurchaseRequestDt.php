@@ -256,13 +256,18 @@ class MPurchaseRequestDt extends Model
             $safeProductName = htmlspecialchars($row['productname'], ENT_QUOTES, 'UTF-8');
             $safeUomName = htmlspecialchars($row['uomnm'] ?? '', ENT_QUOTES, 'UTF-8');
             
+            // Apply same formatting as display column for input field
+            $formattedQtyForInput = (floor($row['qty']) == $row['qty'])
+                ? number_format($row['qty'], 0)  // Whole number for input
+                : number_format($row['qty'], 2); // Fractional with 2 decimals
+
             // Edit button - menggunakan function editDetail yang sudah ada
-            $btnEdit = "<button class='btn btn-sm btn-warning btn-edit-detail' 
-                            data-id='" . $row['id'] . "' 
-                            data-productid='" . $row['productid'] . "' 
-                            data-uomid='" . ($row['uomid'] ?? '') . "' 
-                            data-qty='" . $row['qty'] . "' 
-                            data-productname='" . $safeProductName . "' 
+            $btnEdit = "<button class='btn btn-sm btn-warning btn-edit-detail'
+                            data-id='" . $row['id'] . "'
+                            data-productid='" . $row['productid'] . "'
+                            data-uomid='" . ($row['uomid'] ?? '') . "'
+                            data-qty='" . $formattedQtyForInput . "'
+                            data-productname='" . $safeProductName . "'
                             data-uomname='" . $safeUomName . "'>
                             <i class='bx bx-edit-alt'></i>
                         </button>";
@@ -274,11 +279,16 @@ class MPurchaseRequestDt extends Model
                             <i class='bx bx-trash'></i>
                           </button>";
 
+            // Dynamic quantity display: no decimals for whole numbers, decimals for fractional
+            $formattedQty = (floor($row['qty']) == $row['qty'])
+                ? number_format($row['qty'], 0)  // Whole number: display as integer
+                : number_format($row['qty'], 2); // Fractional: display with 2 decimals
+
             $mappedData[] = [
                 $currentIndex + 1,
                 esc($row['productname']),
                 esc($row['uomnm'] ?? '-'),
-                number_format($row['qty'], 3),
+                $formattedQty,
                 "<div class='text-center'>{$btnEdit} {$btnDelete}</div>"
             ];
             $currentIndex++;
