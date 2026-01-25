@@ -42,7 +42,7 @@ class PurchaseRequest extends BaseController
         $table = Datatables::method([MPurchaseRequestHd::class, 'datatable'], 'searchable')->make();
         $table->updateRow(function ($db, $no) {
             $btn_edit = "<button class='btn btn-sm btn-warning' onclick=\"modalForm('Edit Purchase Request', 'modal-lg', '" . getURL('purchase-request/form/' . encrypting($db->id)) . "', {identifier:this})\" data-id='" . encrypting($db->id) . "'><i class='bx bx-edit-alt'></i></button>";
-            $btn_hapus = "<button class='btn btn-sm btn-danger btn-delete-pr' data-id='" . encrypting($db->id) . "' data-url='" . getURL('purchase-request/delete') . "' data-transcode='" . $db->transcode . "'><i class='bx bx-trash'></i></button>";
+            $btn_hapus = "<button class='btn btn-sm btn-danger btn-delete-pr'data-id='" . encrypting($db->id) . "'data-url='" . getURL('purchase-request/delete') . "'><i class='bx bx-trash'></i></button>";
 
             return [
                 $no,
@@ -146,9 +146,6 @@ class PurchaseRequest extends BaseController
                 'description' => $description,
                 'createdby' => getSession('userid'),
                 'createddate' => date('Y-m-d H:i:s'),
-                // Update audit fields on create to satisfy NOT NULL constraint
-                'updatedby' => getSession('userid'),
-                'updateddate' => date('Y-m-d H:i:s'),
                 'isactive' => true
             ];
             $headerId = $this->mHeader->store($headerData);
@@ -171,9 +168,6 @@ class PurchaseRequest extends BaseController
                         'qty' => (float) $row['qty'],
                         'createdby' => getSession('userid'),
                         'createddate' => date('Y-m-d H:i:s'),
-                        // Update audit fields on create
-                        'updatedby' => getSession('userid'),
-                        'updateddate' => date('Y-m-d H:i:s'),
                         'isactive' => true
                     ];
                 }
@@ -564,8 +558,7 @@ class PurchaseRequest extends BaseController
         $this->db->transBegin();
 
         try {
-            // Use encrypted ID from client (consistent with header delete)
-            $id = decrypting($this->request->getPost('id'));
+            $id = $this->request->getPost('id');
             $productId = $this->request->getPost('productId');
             $uomId = $this->request->getPost('uomId');
             $qty = $this->request->getPost('qty');
@@ -578,15 +571,7 @@ class PurchaseRequest extends BaseController
             // Check if detail exists
             $detail = $this->mDetail->getOne($id);
             if (empty($detail)) {
-                // Detail may have been already deleted; treat as success for idempotence
-                $this->db->transCommit();
-                $res = [
-                    'sukses' => 1,
-                    'pesan' => 'Detail tidak ditemukan, tidak ada perubahan',
-                    'csrfToken' => csrf_hash()
-                ];
-                echo json_encode($res);
-                return;
+                throw new Exception('Detail tidak ditemukan');
             }
 
             $data = [
@@ -630,7 +615,7 @@ class PurchaseRequest extends BaseController
         $this->db->transBegin();
 
         try {
-            $id = decrypting($this->request->getPost('id'));
+            $id = $this->request->getPost('id');
 
             if (empty($id)) {
                 throw new Exception('ID tidak valid');
@@ -639,15 +624,7 @@ class PurchaseRequest extends BaseController
             // Check if detail exists
             $detail = $this->mDetail->getOne($id);
             if (empty($detail)) {
-                // If detail already deleted, treat as success to keep idempotent
-                $this->db->transCommit();
-                $res = [
-                    'sukses' => 1,
-                    'pesan' => 'Detail tidak ditemukan, tidak ada perubahan',
-                    'csrfToken' => csrf_hash()
-                ];
-                echo json_encode($res);
-                return;
+                throw new Exception('Detail tidak ditemukan');
             }
 
             $deleted = $this->mDetail->destroy($id);

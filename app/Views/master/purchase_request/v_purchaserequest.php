@@ -100,8 +100,21 @@
             }
         });
 
-        // Reload table on modal close
+        // Reload table on modal close and reset add form for clean next entry
         $('#modalAdd').on('hidden.bs.modal', function () {
+            // Reset add form fields to prevent sticking state when re-opening
+            if (typeof $('#form-purchaserequest')[0] !== 'undefined') {
+                try { $('#form-purchaserequest')[0].reset(); } catch (e) { /* ignore */ }
+            }
+            // Reset date to today if present in the form
+            if (typeof $('#transdate').val === 'function') {
+                $('#transdate').val(new Date().toISOString().slice(0,10));
+            }
+            // Reset supplier select2 if present
+            if (typeof $('#supplierid').val === 'function') {
+                $('#supplierid').val('').trigger('change');
+            }
+            // Refresh table data
             if (typeof purchaseRequestTable !== 'undefined') {
                 purchaseRequestTable.ajax.reload(null, false);
             }
@@ -115,43 +128,34 @@
         }
     }
 
-    // Header delete - use modal confirmation (server-side)
     $(document).on('click', '.btn-delete-pr', function () {
         const id = $(this).data('id');
-        const transcode = $(this).data('transcode');
-        // Use modalDelete to confirm deletion
-        modalDelete('Delete Purchase Request - ' + transcode, {
-            id: id,
-            custom_handler: 'confirmDeletePR'
-        });
-    });
+        const url = $(this).data('url');
 
-    // Global handler invoked by modalDelete for header deletion
-    window.confirmDeletePR = function(data) {
+        if (!confirm('Yakin ingin menghapus Purchase Request ini?')) {
+            return;
+        }
+
         $.ajax({
-            url: '<?= getURL('purchase-request/delete') ?>',
+            url: url,
             type: 'POST',
-            dataType: 'json',
             data: {
-                id: data.id,
-                <?= csrf_token() ?>: $('#csrf_token_form').val()
+                id: id,
+                csrf_token_name: '<?= csrf_hash() ?>'
             },
-            success: function(res) {
-                $('#modaldel').modal('hide');
+            dataType: 'json',
+            success: function (res) {
                 if (res.sukses == 1) {
-                    if (typeof purchaseRequestTable !== 'undefined') {
-                        purchaseRequestTable.ajax.reload(null, false);
-                    }
                     showNotif('success', res.pesan);
+                    purchaseRequestTable.ajax.reload(null, false);
                 } else {
                     showNotif('error', res.pesan);
                 }
             },
-            error: function(xhr) {
-                $('#modaldel').modal('hide');
-                showNotif('error', 'Delete failed: ' + xhr.responseText);
+            error: function () {
+                showNotif('error', 'Gagal menghapus data');
             }
         });
-    };
+    });
 
 </script>
