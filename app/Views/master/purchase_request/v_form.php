@@ -203,27 +203,18 @@
                         $btn.prop('disabled', false).html('<i class="bx bx-check"></i> <?= ($form_type == 'edit' ? 'Update' : 'Save') ?>');
 
                         if (res.sukses == 1) {
-                            // Do not auto-close modal (customer-like behavior). Keep modal open for quick adds.
-                            // Reset header form fields for clean state on next add
-                            $('#form-purchaserequest')[0].reset();
-                            // Reset transdate to today and ensure date input shows current day
-                            const todayStr = new Date().toISOString().slice(0, 10);
-                            $('#transdate').val(todayStr);
-                            // Clear supplier select2
-                            $('#supplierid').val('').trigger('change');
-
-                            // Reload main table to show the new entry
+                            // Close the add modal on successful save (customer pattern)
+                            $('#modalAdd').modal('hide');
+                            // Refresh main table after closing modal
                             if (typeof purchaseRequestTable !== 'undefined') {
                                 purchaseRequestTable.ajax.reload(null, false);
                             } else {
                                 window.location.reload();
                             }
-
                             // Update CSRF token
                             if (res.csrfToken) {
                                 $('#csrf_token_form').val(res.csrfToken);
                             }
-
                             showNotif('success', res.pesan || 'Data saved successfully');
                         } else {
                             showNotif('error', res.pesan || 'Failed to save data');
