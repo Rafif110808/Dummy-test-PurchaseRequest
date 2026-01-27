@@ -120,9 +120,9 @@ $routes->group('product', function ($routes) {
 
 $routes->group('purchase-request', function ($routes) {
     $routes->add('', 'PurchaseRequest::index', $this->noauth);
-    $routes->add('table', 'PurchaseRequest::table', $this->noauth);
-    $routes->add('form', 'PurchaseRequest::form', $this->noauth); // Form tanpa parameter
-    $routes->add('form/(:any)', 'PurchaseRequest::form/$1', $this->noauth); // Form dengan parameter
+    $routes->add('datatable', 'PurchaseRequest::datatable', $this->noauth);
+    $routes->add('form', 'PurchaseRequest::form', $this->noauth);
+    $routes->add('form/(:any)', 'PurchaseRequest::form/$1', $this->noauth);
     $routes->add('add', 'PurchaseRequest::add', $this->noauth);
     $routes->add('update', 'PurchaseRequest::update', $this->noauth);
     $routes->add('delete', 'PurchaseRequest::delete', $this->noauth);
@@ -134,9 +134,9 @@ $routes->group('purchase-request', function ($routes) {
     $routes->add('updatedetail', 'PurchaseRequest::updateDetail');
     $routes->add('deletedetail', 'PurchaseRequest::deleteDetail');
     $routes->add('getdetailsajax', 'PurchaseRequest::getDetailsAjax');
-
+    // Quick fix alias: map /purchase-request/table to datatable
+    $routes->add('table', 'PurchaseRequest::datatable', $this->noauth);
 });
-
 
 
 

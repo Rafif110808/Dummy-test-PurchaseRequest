@@ -1,161 +1,111 @@
 <?= $this->include('template/v_header') ?>
-<?= $this->include('template/v_appbar') ?>
+    <?= $this->include('template/v_appbar') ?>
 
-<div class="main-content content margin-t-4">
-    <div class="card p-x shadow-sm w-100">
-        <!-- Card Header -->
-        <div class="card-header dflex align-center justify-between">
-            <div>
-                <h4 class="mb-0">Purchase Request</h4>
-                <p class="text-muted fs-7 mb-0">Manage your purchase requests</p>
+    <div class="main-content content margin-t-4">
+        <div class="card p-x shadow-sm w-100">
+            <!-- Card Header -->
+            <div class="card-header dflex align-center justify-between">
+                <div>
+                    <h4 class="mb-0">Purchase Request</h4>
+                    <p class="text-muted fs-7 mb-0">Manage your purchase requests</p>
+                </div>
+                <button class="btn btn-primary dflex align-center"
+                    onclick="return modalForm('Add Purchase Request', 'modal-lg', '<?= getURL('purchase-request/form') ?>')">
+                    <i class="bx bx-plus-circle margin-r-2"></i>
+                    <span class="fw-normal fs-7">Add New</span>
+                </button>
             </div>
-            <button class="btn btn-primary dflex align-center"
-                onclick="return modalForm('Add Purchase Request', 'modal-lg', '<?= getURL('purchase-request/form') ?>')">
-                <i class="bx bx-plus-circle margin-r-2"></i>
-                <span class="fw-normal fs-7">Add New</span>
-            </button>
-        </div>
 
-        <!-- Card Body -->
-        <div class="card mt-4 shadow-sm w-100 gap">
-            <div class="card-body">
-                <div class="table-responsive margin-t-14p">
-                    <table class="table table-bordered table-hover fs-7 w-100" id="table-purchase-request">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 5%">No</th>
-                                <th style="width: 15%">PR Number</th>
-                                <th style="width: 12%">Request Date</th>
-                                <th style="width: 20%">Supplier</th>
-                                <th style="width: 33%">Description</th>
-                                <th style="width: 15%" class="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
+            <!-- Card Body -->
+            <div class="card mt-4 shadow-sm w-100 gap">
+                <div class="card-body">
+                    <div class="table-responsive margin-t-14p">
+                        <table class="table table-bordered table-master fs-7 w-100">
+                            <thead>
+                                <tr>
+                                    <td class="tableheader">No</td>
+                                    <td class="tableheader">PR Number</td>
+                                    <td class="tableheader">Request Date</td>
+                                    <td class="tableheader">Supplier</td>
+                                    <td class="tableheader">Description</td>
+                                    <td class="tableheader">Actions</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<?= $this->include('template/v_footer') ?>
+    <?= $this->include('template/v_footer') ?>
 
-<script>
-    var purchaseRequestTable;
+   <script>
+    var tbl;
 
     $(document).ready(function () {
-        // Destroy existing DataTable if it exists
-        if ($.fn.DataTable.isDataTable('#table-purchase-request')) {
-            $('#table-purchase-request').DataTable().destroy();
+        // Hapus tabel lama jika ada
+        if ($.fn.DataTable.isDataTable('.table-master')) {
+            $('.table-master').DataTable().destroy();
         }
 
         // Initialize DataTable
-        purchaseRequestTable = $('#table-purchase-request').DataTable({
+        tbl = $('.table-master').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
-                url: '<?= getURL('purchase-request/table') ?>',
+                url: '<?= site_url('purchase-request/datatable') ?>',
                 type: 'POST',
+                data: function(d) {
+                    // Tambahkan CSRF token
+                    d.<?= csrf_token() ?> = $('meta[name="csrf-token"]').attr('content') || $('input[name="<?= csrf_token() ?>"]').val();
+                },
                 error: function (xhr, status, error) {
-                    console.error('Error loading data:', error);
+                    console.error('AJAX Error Details:');
+                    console.error('Status:', status);
+                    console.error('Error:', error);
                     console.error('Response:', xhr.responseText);
-                    showNotif('error', 'Failed to load data');
+                    
+                    // Tampilkan pesan error yang lebih user-friendly
+                    if (xhr.status === 0) {
+                        alert('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
+                    } else if (xhr.status === 404) {
+                        alert('Endpoint tidak ditemukan. Periksa konfigurasi route.');
+                    } else if (xhr.status === 500) {
+                        alert('Server error. Silakan cek log server.');
+                    } else {
+                        alert('Terjadi kesalahan: ' + error);
+                    }
                 }
             },
             columns: [
-                { data: 0, width: '5%', orderable: false },
-                { data: 1, width: '15%' },
-                { data: 2, width: '12%' },
-                { data: 3, width: '20%' },
-                { data: 4, width: '33%' },
-                { data: 5, width: '15%', orderable: false, searchable: false, className: 'text-center' }
+                { data: 0, orderable: false, searchable: false },
+                { data: 1, orderable: true },
+                { data: 2, orderable: true },
+                { data: 3, orderable: true },
+                { data: 4, orderable: true },
+                { data: 5, orderable: false, searchable: false }
             ],
-            order: [[1, 'desc']],
+            order: [[1, 'desc']], // Order by PR Number descending
             pageLength: 10,
             lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             language: {
-                processing: '<i class="bx bx-loader-alt bx-spin"></i> Loading...',
-                search: 'Search:',
-                lengthMenu: 'Show _MENU_ entries',
-                info: 'Showing _START_ to _END_ of _TOTAL_ entries',
-                infoEmpty: 'Showing 0 to 0 of 0 entries',
-                infoFiltered: '(filtered from _MAX_ total entries)',
-                zeroRecords: 'No matching records found',
-                emptyTable: 'No data available in table',
+                processing: '<i class="bx bx-loader-alt bx-spin"></i> Memuat data...',
+                emptyTable: 'Tidak ada data Purchase Request',
+                zeroRecords: 'Data tidak ditemukan',
+                info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
+                infoEmpty: 'Menampilkan 0 sampai 0 dari 0 data',
+                infoFiltered: '(difilter dari _MAX_ total data)',
+                search: 'Cari:',
                 paginate: {
-                    first: '<i class="bx bx-chevrons-left"></i>',
-                    previous: '<i class="bx bx-chevron-left"></i>',
-                    next: '<i class="bx bx-chevron-right"></i>',
-                    last: '<i class="bx bx-chevrons-right"></i>'
+                    first: 'Pertama',
+                    last: 'Terakhir',
+                    next: 'Selanjutnya',
+                    previous: 'Sebelumnya'
                 }
-            },
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-                '<"row"<"col-sm-12"tr>>' +
-                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-            drawCallback: function () {
-                // Add custom styling or actions after table draw
-                $('[data-toggle="tooltip"]').tooltip();
-            }
-        });
-
-        // Reload table on modal close and reset add form for clean next entry
-        $('#modalAdd').on('hidden.bs.modal', function () {
-            // Reset add form fields to prevent sticking state when re-opening
-            if (typeof $('#form-purchaserequest')[0] !== 'undefined') {
-                try { $('#form-purchaserequest')[0].reset(); } catch (e) { /* ignore */ }
-            }
-            // Reset date to today if present in the form
-            if (typeof $('#transdate').val === 'function') {
-                $('#transdate').val(new Date().toISOString().slice(0,10));
-            }
-            // Reset supplier select2 if present
-            if (typeof $('#supplierid').val === 'function') {
-                $('#supplierid').val('').trigger('change');
-            }
-            // Refresh table data
-            if (typeof purchaseRequestTable !== 'undefined') {
-                purchaseRequestTable.ajax.reload(null, false);
             }
         });
     });
-
-    // Refresh table function (optional - for manual refresh)
-    function refreshTable() {
-        if (typeof purchaseRequestTable !== 'undefined') {
-            purchaseRequestTable.ajax.reload(null, false);
-        }
-    }
-
-    $(document).on('click', '.btn-delete-pr', function () {
-        const id = $(this).data('id');
-        const url = $(this).data('url');
-
-        if (!confirm('Yakin ingin menghapus Purchase Request ini?')) {
-            return;
-        }
-
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: {
-                id: id,
-                csrf_token_name: '<?= csrf_hash() ?>'
-            },
-            dataType: 'json',
-            success: function (res) {
-                if (res.sukses == 1) {
-                    showNotif('success', res.pesan);
-                    purchaseRequestTable.ajax.reload(null, false);
-                } else {
-                    showNotif('error', res.pesan);
-                }
-            },
-            error: function () {
-                showNotif('error', 'Gagal menghapus data');
-            }
-        });
-    });
-
 </script>

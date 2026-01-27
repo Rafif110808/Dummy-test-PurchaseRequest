@@ -39,17 +39,20 @@ class Request
      * */
     public function search()
     {
-        return SearchValue::fromArray($this->request->getVar('search'));
+        $searchData = $this->request->getVar('search') ?? []; // jika null, pakai array kosong
+        return SearchValue::fromArray($searchData);
     }
+
 
     /**
      * @return Column[]
      * */
     public function columns()
     {
-        $columns = array();
-        foreach($this->request->getVar('columns') as $column)
-        {
+        $columnsData = $this->request->getVar('columns') ?? [];
+        $columns = [];
+
+        foreach ($columnsData as $column) {
             $columns[] = Column::fromArray($column);
         }
 
@@ -61,26 +64,25 @@ class Request
      * */
     public function orders()
     {
-        $orders = array();
-        foreach($this->request->getVar('order') as $order)
-        {
+        $ordersData = $this->request->getVar('order') ?? []; // jika null, pakai array kosong
+        $orders = [];
+
+        foreach ($ordersData as $order) {
             $orders[] = Order::fromArray($order);
         }
 
         return $orders;
     }
 
+
     public function setDatabaseColumns(array $columns)
     {
         $dbcolumns = array();
-        foreach($columns as $key => $column)
-        {
-            if(!is_null($column))
-            {
-                if(is_callable($column))
+        foreach ($columns as $key => $column) {
+            if (!is_null($column)) {
+                if (is_callable($column))
                     $dbcolumns[] = Column::fromArray(['name' => $key, 'raw' => $column]);
-
-                else if(is_array($column))
+                else if (is_array($column))
                     $dbcolumns[] = Column::fromArray([
                         'name' => $key,
                         'field' => isset($column['field']) ? $column['field'] : null,
@@ -88,12 +90,10 @@ class Request
                         'format' => isset($column['format']) ? $column['format'] : null,
                         'query' => isset($column['query']) ? $column['query'] : null,
                     ]);
-
                 else
                     $dbcolumns[] = Column::fromArray(['name' => $column]);
-            }
-
-            else $dbcolumns[] = new Column();
+            } else
+                $dbcolumns[] = new Column();
         }
 
         $this->dbcolumns = $dbcolumns;

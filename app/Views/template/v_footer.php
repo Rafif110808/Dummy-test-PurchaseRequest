@@ -6,7 +6,8 @@
 </body>
 <script src="<?= base_url('public/js/ckeditor5.js') ?>"></script>
 <!-- Modal Preview -->
-<div class="modal fade" id="modalprev" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="modalprevLabel" aria-hidden="true">
+<div class="modal fade" id="modalprev" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="modalprevLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -14,24 +15,31 @@
                     <div class="spans">
                         <span class="modal-title fs-6set fw-normal" id="modalprev-title"></span>
                     </div>
-                    <button type="button" class="btn text-dark" style="font-size: 24px" onclick="close_modal('modalprev')">&times;</button>
+                    <button type="button" class="btn text-dark" style="font-size: 24px"
+                        onclick="close_modal('modalprev')">&times;</button>
                 </div>
             </div>
-            <div class="modal-body dflex align-center justify-center form-preview" style="padding: 12px;" id="modelbodyprev">
+            <div class="modal-body dflex align-center justify-center form-preview" style="padding: 12px;"
+                id="modelbodyprev">
             </div>
         </div>
     </div>
 </div>
 <!-- Modal Form -->
-<div class="modal fade" id="modaldetail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+<div class="modal fade" id="modaldetail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog" id="modaldetail-size" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <input type="hidden" name="modaldetail-id" id="modaldetail-id">
                 <input type="hidden" name="modaldetail-link" id="modaldetail-link">
-                <div class="dflex justify-between align-center" style="width: 100%;border-bottom: 1px solid rgba(25, 75, 120, 0.15); padding-block: 4px;">
-                    <span class="modal-title fs-6set fw-normal text-dark" id="modaldetail-title" style="width: 90% !important;"></span>
-                    <button type="button" class="btn text-dark" style="height:max-content;font-size: 24px;padding: 0px !important;padding-block: 0px !important;" id="btn-close-modaldetail" onclick="close_modal('modaldetail')">&times;</button>
+                <div class="dflex justify-between align-center"
+                    style="width: 100%;border-bottom: 1px solid rgba(25, 75, 120, 0.15); padding-block: 4px;">
+                    <span class="modal-title fs-6set fw-normal text-dark" id="modaldetail-title"
+                        style="width: 90% !important;"></span>
+                    <button type="button" class="btn text-dark"
+                        style="height:max-content;font-size: 24px;padding: 0px !important;padding-block: 0px !important;"
+                        id="btn-close-modaldetail" onclick="close_modal('modaldetail')">&times;</button>
                 </div>
             </div>
             <div class="modal-body margin-t-2" id="modaldetail-form">
@@ -41,15 +49,19 @@
     </div>
 </div>
 
-<div class="modal fade" id="modaldetailtwo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+<div class="modal fade" id="modaldetailtwo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog" id="modaldetailtwo-size" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <input type="hidden" name="modaldetailtwo-id" id="modaldetailtwo-id">
                 <input type="hidden" name="modaldetailtwo-link" id="modaldetailtwo-link">
-                <div class="dflex justify-between align-center" style="width: 100%;border-bottom: 1px solid rgba(25, 75, 120, 0.15); padding-block: 4px;">
+                <div class="dflex justify-between align-center"
+                    style="width: 100%;border-bottom: 1px solid rgba(25, 75, 120, 0.15); padding-block: 4px;">
                     <span class="modal-title fs-6set fw-normal text-dark" id="modaldetailtwo-title"></span>
-                    <button type="button" class="btn text-dark" style="height:max-content;font-size: 24px;padding: 0px !important;padding-block: 0px !important;" id="btn-close-modaldetail" onclick="close_modal('modaldetailtwo')">&times;</button>
+                    <button type="button" class="btn text-dark"
+                        style="height:max-content;font-size: 24px;padding: 0px !important;padding-block: 0px !important;"
+                        id="btn-close-modaldetail" onclick="close_modal('modaldetailtwo')">&times;</button>
                 </div>
             </div>
             <div class="modal-body margin-t-2" id="modaldetailtwo-form">
@@ -59,7 +71,8 @@
     </div>
 </div>
 <!-- Modal Log Out -->
-<div class="modal fade" id="modalout" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+<div class="modal fade" id="modalout" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"
+    data-bs-backdrop="static">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -90,7 +103,8 @@
     </div>
 </div>
 <!-- Modal Release -->
-<div class="modal fade" id="modalrel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
+<div class="modal fade" id="modalrel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"
+    style="z-index: 2147483647 !important" data-bs-backdrop="static">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -98,11 +112,13 @@
                     <div class="spans">
                         <span class="modal-title fs-6set fw-normal" id="modalrel-title"></span>
                     </div>
-                    <button type="button" class="btn text-dark" style="font-size: 24px" onclick="close_modal('modalrel')">&times;</button>
+                    <button type="button" class="btn text-dark" style="font-size: 24px"
+                        onclick="close_modal('modalrel')">&times;</button>
                 </div>
             </div>
             <div class="modal-body">
-                <span class="fw-normal fs-7set text-dark">Are you sure to <span id="type-release"></span> this data ?</span>
+                <span class="fw-normal fs-7set text-dark">Are you sure to <span id="type-release"></span> this data
+                    ?</span>
                 <div class="plus-message">
 
                 </div>
@@ -111,14 +127,17 @@
                 </div>
             </div>
             <div class="modal-footer margin-t-2 p-x-2">
-                <button type="button" class="btn btn-warning" id="cancel-release" onclick="close_modal('modalrel')"><span class="fw-normal fs-7">No, Cancel</span></button>
-                <button type="button" class="btn btn-primary" id="confirm-release"><span class="fw-normal fs-7">Yes, Continue</span></button>
+                <button type="button" class="btn btn-warning" id="cancel-release"
+                    onclick="close_modal('modalrel')"><span class="fw-normal fs-7">No, Cancel</span></button>
+                <button type="button" class="btn btn-primary" id="confirm-release"><span class="fw-normal fs-7">Yes,
+                        Continue</span></button>
             </div>
         </div>
     </div>
 </div>
 <!-- Modal Cropper -->
-<div class="modal fade" id="modalCropper" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
+<div class="modal fade" id="modalCropper" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -126,7 +145,8 @@
                     <div class="spans">
                         <h5 class="modal-title fs-6set text-dark" id="modalCropperLabel">Pre-Process Photo Profile</h5>
                     </div>
-                    <button type="button" class="btn text-dark" style="font-size: 24px" onclick="close_modal('modalCropper')">&times;</button>
+                    <button type="button" class="btn text-dark" style="font-size: 24px"
+                        onclick="close_modal('modalCropper')">&times;</button>
                 </div>
             </div>
             <div class="modal-body text-center" style="margin-bottom:18px;">
@@ -138,12 +158,15 @@
                     </div>
                     <div class="col-4">
                         <div class="dflex align-center justify-center">
-                            <div style="width: 90%;height:250px;padding:4px;margin-block:4px;border:1px solid rgba(108, 108, 108, 0.25)">
-                                <img src="<?= base_url('public/images/blank.jpg') ?>" loading="lazy" alt="preview" id="preview-alt" style="width: 100%;height:100%;object-fit:contain;">
+                            <div
+                                style="width: 90%;height:250px;padding:4px;margin-block:4px;border:1px solid rgba(108, 108, 108, 0.25)">
+                                <img src="<?= base_url('public/images/blank.jpg') ?>" loading="lazy" alt="preview"
+                                    id="preview-alt" style="width: 100%;height:100%;object-fit:contain;">
                             </div>
                         </div>
                         <div class="dflex align-center justify-center">
-                            <button class="btn btn-primary dflex align-center justify-center" style="width: 90%;" id="btn-crop">
+                            <button class="btn btn-primary dflex align-center justify-center" style="width: 90%;"
+                                id="btn-crop">
                                 <i class="bx bx-crop margin-r-3"></i>
                                 <span class="fw-normal fs-7">Save Images</span>
                             </button>
@@ -155,7 +178,8 @@
     </div>
 </div>
 <!-- Modal Cancel Booking -->
-<div class="modal fade" id="modalcancel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
+<div class="modal fade" id="modalcancel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -164,13 +188,17 @@
                     <input type="hidden" name="link" id="modalcancel-link">
                     <input type="hidden" name="types" id="modalcancel-type">
                     <div class="spans">
-                        <span class="modal-title fs-6set fw-normal" id="modalcancel-title"><span id="modalcancel-typetitle" style="text-transform: capitalize;"></span> Booking Stock</span>
+                        <span class="modal-title fs-6set fw-normal" id="modalcancel-title"><span
+                                id="modalcancel-typetitle" style="text-transform: capitalize;"></span> Booking
+                            Stock</span>
                     </div>
-                    <button type="button" class="btn text-dark" style="font-size: 24px" onclick="close_modal('modalcancel')">&times;</button>
+                    <button type="button" class="btn text-dark" style="font-size: 24px"
+                        onclick="close_modal('modalcancel')">&times;</button>
                 </div>
             </div>
             <div class="modal-body">
-                <span class="fw-normal fs-7set text-dark">Are you sure to <span id="modalcancel-typecancel"></span> this booking stock ?</span>
+                <span class="fw-normal fs-7set text-dark">Are you sure to <span id="modalcancel-typecancel"></span> this
+                    booking stock ?</span>
                 <div class="plus-message">
 
                 </div>
@@ -179,14 +207,17 @@
                 </div>
             </div>
             <div class="modal-footer margin-t-2 p-x-2">
-                <button type="button" class="btn btn-warning" id="cancel-cancel" onclick="close_modal('modalcancel')"><span class="fw-normal fs-7">No, Cancel</span></button>
-                <button type="button" class="btn btn-primary" id="confirm-cancel-booking"><span class="fw-normal fs-7">Yes, Continue</span></button>
+                <button type="button" class="btn btn-warning" id="cancel-cancel"
+                    onclick="close_modal('modalcancel')"><span class="fw-normal fs-7">No, Cancel</span></button>
+                <button type="button" class="btn btn-primary" id="confirm-cancel-booking"><span
+                        class="fw-normal fs-7">Yes, Continue</span></button>
             </div>
         </div>
     </div>
 </div>
 <!-- Move to Order -->
-<div class="modal fade" id="modalorder" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
+<div class="modal fade" id="modalorder" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -194,9 +225,12 @@
                     <input type="hidden" name="hdid" id="modalorder-hdid">
                     <input type="hidden" name="link" id="modalorder-link">
                     <div class="spans">
-                        <span class="modal-title fs-6set fw-normal" id="modalorder-title"><span id="modalorder-typetitle" style="text-transform: capitalize;"></span>Move to Order Booking Stock</span>
+                        <span class="modal-title fs-6set fw-normal" id="modalorder-title"><span
+                                id="modalorder-typetitle" style="text-transform: capitalize;"></span>Move to Order
+                            Booking Stock</span>
                     </div>
-                    <button type="button" class="btn text-dark" style="font-size: 24px" onclick="close_modal('modalorder')">&times;</button>
+                    <button type="button" class="btn text-dark" style="font-size: 24px"
+                        onclick="close_modal('modalorder')">&times;</button>
                 </div>
             </div>
             <div class="modal-body">
@@ -209,14 +243,17 @@
                 </div>
             </div>
             <div class="modal-footer margin-t-2 p-x-2">
-                <button type="button" class="btn btn-warning" id="cancel-order" onclick="close_modal('modalorder')"><span class="fw-normal fs-7">No, Cancel</span></button>
-                <button type="button" class="btn btn-primary" id="confirm-order"><span class="fw-normal fs-7">Yes, Continue</span></button>
+                <button type="button" class="btn btn-warning" id="cancel-order"
+                    onclick="close_modal('modalorder')"><span class="fw-normal fs-7">No, Cancel</span></button>
+                <button type="button" class="btn btn-primary" id="confirm-order"><span class="fw-normal fs-7">Yes,
+                        Continue</span></button>
             </div>
         </div>
     </div>
 </div>
 <!-- Modal Delete -->
-<div class="modal fade" id="modaldel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
+<div class="modal fade" id="modaldel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"
+    style="z-index: 2147483647 !important" data-bs-backdrop="static">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -226,7 +263,9 @@
                         </span>
                     </div>
                     <div class="col-1 dflex align-center justify-end">
-                        <button type="button" class="btn text-dark" style="font-size: 24px;width:max-content;height:max-content;padding: 0px;margin-right:8px;" onclick="close_modal('modaldel')">×</button>
+                        <button type="button" class="btn text-dark"
+                            style="font-size: 24px;width:max-content;height:max-content;padding: 0px;margin-right:8px;"
+                            onclick="close_modal('modaldel')">×</button>
                     </div>
                 </div>
             </div>
@@ -240,13 +279,16 @@
                 </div>
             </div>
             <div class="modal-footer margin-t-2 p-x-2">
-                <button type="button" class="btn btn-secondary" id="cancel-delete" onclick="close_modal('modaldel')"><span class="fw-normal fs-7">No, Keep It</span></button>
-                <button type="button" class="btn btn-danger" id="confirm-delete"><span class="fw-normal fs-7">Yes, Delete It</span></button>
+                <button type="button" class="btn btn-secondary" id="cancel-delete"
+                    onclick="close_modal('modaldel')"><span class="fw-normal fs-7">No, Keep It</span></button>
+                <button type="button" class="btn btn-danger" id="confirm-delete"><span class="fw-normal fs-7">Yes,
+                        Delete It</span></button>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="modaldeltwo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
+<div class="modal fade" id="modaldeltwo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -254,7 +296,8 @@
                     <div class="spans">
                         <span class="modal-title fs-6set fw-normal" id="modaldeltwo-title"></span>
                     </div>
-                    <button type="button" class="btn text-dark" style="font-size: 24px" onclick="close_modal('modaldeltwo')">&times;</button>
+                    <button type="button" class="btn text-dark" style="font-size: 24px"
+                        onclick="close_modal('modaldeltwo')">&times;</button>
                 </div>
             </div>
             <div class="modal-body">
@@ -267,13 +310,16 @@
                 </div>
             </div>
             <div class="modal-footer margin-t-2 p-x-2">
-                <button type="button" class="btn btn-secondary" id="cancel-delete" onclick="close_modal('modaldeltwo')"><span class="fw-normal fs-7">No, Keep It</span></button>
-                <button type="button" class="btn btn-danger" id="confirm-delete"><span class="fw-normal fs-7">Yes, Delete It</span></button>
+                <button type="button" class="btn btn-secondary" id="cancel-delete"
+                    onclick="close_modal('modaldeltwo')"><span class="fw-normal fs-7">No, Keep It</span></button>
+                <button type="button" class="btn btn-danger" id="confirm-delete"><span class="fw-normal fs-7">Yes,
+                        Delete It</span></button>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="errorModalInfo" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="errorModalInfoLabel" aria-hidden="true">
+<div class="modal fade" id="errorModalInfo" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="errorModalInfoLabel" aria-hidden="true">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-body dflex align-center justify-center">
@@ -287,7 +333,8 @@
     </div>
 </div>
 <!-- Modal Synchronize -->
-<div class="modal fade" id="modalsync" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
+<div class="modal fade" id="modalsync" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -295,7 +342,8 @@
                     <div class="spans" style="width: 90%;">
                         <span class="modal-title fs-6set fw-normal" id="sync-title"></span>
                     </div>
-                    <button type="button" class="btn text-dark" style="font-size: 24px" onclick="close_modal('modalsync')">&times;</button>
+                    <button type="button" class="btn text-dark" style="font-size: 24px"
+                        onclick="close_modal('modalsync')">&times;</button>
                 </div>
             </div>
             <div class="modal-body">
@@ -309,8 +357,10 @@
                 </div>
             </div>
             <div class="modal-footer margin-t-2 p-x-2">
-                <button type="button" class="btn btn-secondary" id="cancel-sync" onclick="close_modal('modalsync')"><span class="fw-normal fs-7">Cancel</span></button>
-                <button type="button" class="btn btn-primary" id="confirm-sync"><span class="fw-normal fs-7">Pull</span></button>
+                <button type="button" class="btn btn-secondary" id="cancel-sync"
+                    onclick="close_modal('modalsync')"><span class="fw-normal fs-7">Cancel</span></button>
+                <button type="button" class="btn btn-primary" id="confirm-sync"><span
+                        class="fw-normal fs-7">Pull</span></button>
             </div>
         </div>
     </div>
@@ -329,7 +379,8 @@
     </div>
 </div>
 <!-- Modal Cancel Request -->
-<div class="modal fade" id="modal-cancel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
+<div class="modal fade" id="modal-cancel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" style="z-index: 2147483647 !important" data-bs-backdrop="static">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -340,7 +391,9 @@
                         </span>
                     </div>
                     <div class="col-1 dflex align-center justify-end">
-                        <button type="button" class="btn text-dark" style="font-size: 24px;width:max-content;height:max-content;padding: 0px;margin-right:8px;" onclick="close_modal('modal-cancel')">×</button>
+                        <button type="button" class="btn text-dark"
+                            style="font-size: 24px;width:max-content;height:max-content;padding: 0px;margin-right:8px;"
+                            onclick="close_modal('modal-cancel')">×</button>
                     </div>
                 </div>
             </div>
@@ -348,8 +401,10 @@
                 <span class="fw-normal fs-7set text-dark">Are you sure to cancel this request?</span>
             </div>
             <div class="modal-footer margin-t-2 p-x-2">
-                <button type="button" class="btn btn-secondary" id="cancel-delete" onclick="close_modal('modal-cancel')"><span class="fw-normal fs-7">No, Keep It</span></button>
-                <button type="button" class="btn btn-danger" id="confirm-cancel"><span class="fw-normal fs-7">Yes, Cancel It</span></button>
+                <button type="button" class="btn btn-secondary" id="cancel-delete"
+                    onclick="close_modal('modal-cancel')"><span class="fw-normal fs-7">No, Keep It</span></button>
+                <button type="button" class="btn btn-danger" id="confirm-cancel"><span class="fw-normal fs-7">Yes,
+                        Cancel It</span></button>
             </div>
         </div>
     </div>
@@ -459,7 +514,7 @@
             type: 'post',
             dataType: 'json',
             data: data,
-            success: function(res) {
+            success: function (res) {
                 $('#title-slideUp').text(title);
                 $('#slideUp-form').addClass('openSlide')
                 $('#form-slideUp').html(res.view);
@@ -510,7 +565,7 @@
                 soid: soid,
                 <?= csrf_token() ?>: decrypter($("#csrf_token").val()),
             },
-            success: function(res) {
+            success: function (res) {
                 $("#csrf_token").val(encrypter(res.csrfToken));
                 var atype = '';
                 if (res.sukses == 1) {
@@ -523,15 +578,15 @@
                 }
                 showNotif(atype, res.pesan);
             },
-            error: function(xhr, ajaxOptions, thrownError) {
+            error: function (xhr, ajaxOptions, thrownError) {
                 showError(thrownError);
             }
         })
     }
 
     function sideHasParent() {
-        $('.sidebar .sidebar-nav .sidebar-item').each(function() {
-            $(this).click(function() {
+        $('.sidebar .sidebar-nav .sidebar-item').each(function () {
+            $(this).click(function () {
                 if ($(this).hasClass('side-parent')) {
                     if (!$(this).parent().parent().parent().parent().hasClass('show-lg')) {
                         $(this).toggleClass('active');
@@ -551,18 +606,18 @@
     }
 
     function sidebarEvent() {
-        $('.submenu .submenu-item').each(function() {
-            $(this).click(function(e) {
+        $('.submenu .submenu-item').each(function () {
+            $(this).click(function (e) {
                 e.stopPropagation();
             })
         })
         subMenu();
-        $('.side-toggle.slide').click(function() {
+        $('.side-toggle.slide').click(function () {
             $('aside').toggleClass('show-sm');
             $('aside').removeClass('show-lg');
             subMenu();
         })
-        $('.side-toggle.shrink').click(function() {
+        $('.side-toggle.shrink').click(function () {
             $('aside').toggleClass('show-lg');
             $('aside').removeClass('show-sm');
             subMenu();
@@ -575,10 +630,10 @@
             r.removeClass('active')
             r.parent().find('.submenu').fadeOut();
             $('aside.show-lg .sidebar .sidebar-nav .sidebar-item.side-parent').hover(
-                function() {
+                function () {
                     $(this).addClass('openSub')
                 },
-                function() {
+                function () {
                     $(this).removeClass('openSub')
                     $('.subChild').removeClass('opened');
                 }
@@ -605,13 +660,13 @@
                 change: changeTo,
                 <?= csrf_token() ?>: decrypter($("#csrf_token").val()),
             },
-            success: function(response) {
+            success: function (response) {
                 $("#csrf_token").val(encrypter(response.csrfToken));
                 $(`#${parent}`).html(response.view);
                 $(elem).siblings('.tabs-item').removeClass('active');
                 $(elem).addClass('active');
             },
-            error: function(xhr, ajaxOptions, thrownError) {
+            error: function (xhr, ajaxOptions, thrownError) {
                 showError(thrownError);
             }
         })
@@ -624,7 +679,7 @@
         if (type != 'open') {
             oldClass = "col-12";
             newClass = "col-3";
-            $(elem).siblings('#form-search').fadeOut('slow', function() {
+            $(elem).siblings('#form-search').fadeOut('slow', function () {
                 renewClass($(elem).parent().parent(), oldClass, newClass);
                 setTimeout(() => {
                     $(elem).fadeIn('slow');
@@ -634,12 +689,12 @@
                 }, 150);
             })
         } else {
-            $(elem).parentsUntil('.appbar').siblings('.back').fadeOut('fast', function() {
-                $(elem).parentsUntil('.appbar').siblings('.titles').fadeOut('slow', function() {
-                    $(elem).fadeOut('fast', function() {
-                        $(elem).siblings('button').fadeOut('fast', function() {
+            $(elem).parentsUntil('.appbar').siblings('.back').fadeOut('fast', function () {
+                $(elem).parentsUntil('.appbar').siblings('.titles').fadeOut('slow', function () {
+                    $(elem).fadeOut('fast', function () {
+                        $(elem).siblings('button').fadeOut('fast', function () {
                             renewClass($(elem).parent().parent(), oldClass, newClass);
-                            $(elem).siblings('#form-search').fadeIn('fast', function() {
+                            $(elem).siblings('#form-search').fadeIn('fast', function () {
                                 $('#search').focus();
                             });
                         })
@@ -682,7 +737,7 @@
                 id: id,
             },
             dataType: 'json',
-            success: function(res) {
+            success: function (res) {
                 $("#csrf_token").val(encrypter(res.csrfToken))
                 $('#modaldetail-size').removeClass();
                 $('#modaldetail-id').val(id);
@@ -697,7 +752,7 @@
                 }
                 $('#modaldetail-form').html(res.view);
             },
-            error: function(xhr, ajaxOptions, thrownError) {
+            error: function (xhr, ajaxOptions, thrownError) {
                 showError(thrownError);
             }
         })
@@ -716,7 +771,7 @@
             type: 'post',
             data: datas,
             dataType: 'json',
-            success: function(res) {
+            success: function (res) {
                 $(elem).html(old_html);
                 $(elem).removeAttr('disabled');
                 $("button.btn").removeAttr('disabled');
@@ -737,7 +792,7 @@
                     dp('#modaldetail')
                 }
             },
-            error: function(xhr, ajaxOptions, thrownError) {
+            error: function (xhr, ajaxOptions, thrownError) {
                 showError(thrownError);
                 $(elem).html(old_html);
                 $(elem).removeAttr('disabled');
@@ -762,7 +817,7 @@
             type: 'post',
             data: datas,
             dataType: 'json',
-            success: function(res) {
+            success: function (res) {
                 if (elem != undefined) {
                     $(elem).html(old_html);
                     $(elem).removeAttr('disabled');
@@ -785,7 +840,7 @@
                     dp('#modaldetailtwo')
                 }
             },
-            error: function(xhr, ajaxOptions, thrownError) {
+            error: function (xhr, ajaxOptions, thrownError) {
                 showError(thrownError);
                 if (elem != undefined) {
                     $(elem).html(old_html);
@@ -883,12 +938,12 @@
             url: '<?= current_url(true) ?>/table',
             type: 'post',
             dataType: 'json',
-            data: function(param) {
+            data: function (param) {
                 param["<?= csrf_token() ?>"] = decrypter($("#csrf_token").val());
                 return param;
             },
             "deferRender": true,
-            dataSrc: function(json) {
+            dataSrc: function (json) {
                 let gt = json.tambahan.grandtotal;
                 if (gt != undefined) {
                     $("#text-grandtotal").text(gt);
@@ -907,14 +962,14 @@
             url: '<?= getURL('loghistory/table_history') ?>',
             type: 'post',
             dataType: 'json',
-            data: function(param) {
+            data: function (param) {
                 param["<?= csrf_token() ?>"] = decrypter($("#csrf_token").val());
                 param['parameter'] = $("#param-history").val();
                 param['ids'] = $("#data_ids").val();
                 param['dtids'] = $("#list_dtids").val();
                 return param;
             },
-            dataSrc: function(json) {
+            dataSrc: function (json) {
                 $("#csrf_token").val(encrypter(json.csrfToken));
                 return json.data
             }
@@ -941,7 +996,7 @@
     }
 
     function getTotal() {
-        $('.istats').each(function() {
+        $('.istats').each(function () {
             var elm = $(this);
             var status = $(this).data('status');
             $.ajax({
@@ -953,7 +1008,7 @@
                     status: status,
                     <?= csrf_token() ?>: decrypter($("#csrf_token").val()),
                 },
-                success: function(res) {
+                success: function (res) {
                     $("#csrf_token").val(encrypter(res.csrfToken));
                     elm.text(res.total);
                 }
@@ -961,15 +1016,15 @@
         })
     }
     // Prevent Triple CLick Selection
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         let clickCount = 0;
         let clickTimer;
 
-        document.body.addEventListener('click', function(event) {
+        document.body.addEventListener('click', function (event) {
             clickCount++;
             clearTimeout(clickTimer);
 
-            clickTimer = setTimeout(function() {
+            clickTimer = setTimeout(function () {
                 clickCount = 0;
             }, 400); // Waktu reset clickCount (misal: 400ms)
 
@@ -1015,7 +1070,7 @@
     }
 
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         let editorInstance = null;
 
         dp();
@@ -1025,13 +1080,13 @@
         // load_notification();
         // Sidebar Navigate
         // Appbar search focus out
-        $('#search:not(.notif)').focusout(function() {
+        $('#search:not(.notif)').focusout(function () {
             var stype = $('#form-search').data('s');
             search($('.icon-search'), stype, 'hide');
         })
         // new tab
-        $('.btn-newtab').each(function() {
-            $(this).click(function(e) {
+        $('.btn-newtab').each(function () {
+            $(this).click(function (e) {
                 e.stopPropagation();
                 e.preventDefault();
                 var urls = $(this).data('link');
@@ -1039,8 +1094,8 @@
             })
         })
         // new window
-        $('.btn-copylink').each(function() {
-            $(this).click(function(e) {
+        $('.btn-copylink').each(function () {
+            $(this).click(function (e) {
                 e.stopPropagation();
                 e.preventDefault();
                 var url = $(this).children('#copys').val();
@@ -1052,8 +1107,8 @@
                 showSuccess('Link Copied!');
             })
         })
-        $('.sidebar .sidebar-nav a.no-parent').each(function() {
-            $(this).on('click', function(evt) {
+        $('.sidebar .sidebar-nav a.no-parent').each(function () {
+            $(this).on('click', function (evt) {
                 evt.preventDefault();
                 evt.stopImmediatePropagation();
                 if (evt.ctrlKey) {
@@ -1064,8 +1119,8 @@
             })
         })
         // Nested Sidebar
-        $('.sub-item.haveSub').each(function(i, e) {
-            $(this).click(function(e) {
+        $('.sub-item.haveSub').each(function (i, e) {
+            $(this).click(function (e) {
                 e.preventDefault()
                 e.stopPropagation();
                 let ch = $(this).next('.childSub');
@@ -1074,9 +1129,9 @@
             })
         })
         // Show LG nested sidebar
-        $('.haveChild').each(function() {
+        $('.haveChild').each(function () {
             $(this).hover(
-                function() {
+                function () {
                     let pr = $(this).next('#listSub').children('.subChild');
                     if (pr.hasClass('opened')) {
                         pr.removeClass('opened');
@@ -1087,18 +1142,19 @@
             )
         })
         // Breadcrumb
-        $('.breadcrumb .breadcrumb-item:not(:last-of-type)').each(function(i, e) {
+        $('.breadcrumb .breadcrumb-item:not(:last-of-type)').each(function (i, e) {
             $(this).after(`<span class="breadcrumb-item icon"><i class="bx bx-chevron-right"></i></span>`);
         })
         // Delete Button
-        $("#confirm-delete").on('click', function() {
+        // Delete Button
+        $("#confirm-delete").on('click', function () {
             let link = "";
             let id = "";
             let pagetype = "";
             let reloadpage = "";
             let reloadurl = "";
             let table_cls = "";
-            $(".re-set").each(function() {
+            $(".re-set").each(function () {
                 let k = $(this).attr('key');
                 let v = $(this).attr('vals');
                 if (k == 'link') {
@@ -1124,14 +1180,14 @@
                     <?= csrf_token() ?>: decrypter($("#csrf_token").val())
                 },
                 dataType: 'json',
-                success: function(res) {
+                success: function (res) {
                     $("#csrf_token").val(encrypter(res.csrfToken));
                     if (res.sukses != '0' || res.sukses != 0) {
                         close_modal('modaldel');
                         var pesan = (res.pesan !== undefined ? res.pesan : 'Data Berhasil dihapus');
                         showSuccess(pesan);
                         if (pagetype == 'pages') {
-                            $('#' + reloadpage).load(reloadurl, function() {
+                            $('#' + reloadpage).load(reloadurl, function () {
                                 // dp('#' + reloadpage);
                             })
                         } else if (pagetype == 'table') {
@@ -1139,9 +1195,14 @@
                             if (typeof tbls !== 'undefined') {
                                 tbls.ajax.reload();
                             }
+                        } else if (pagetype == 'detailtable') {
+                            // RELOAD DETAIL TABLE (SERVER-SIDE)
+                            if (typeof detailsTbl !== 'undefined') {
+                                detailsTbl.ajax.reload(null, false);
+                            }
                         } else if (pagetype == 'tablespecific') {
                             if (table_cls == 'tbl_sub') {
-                                tbl_sub.ajax.reload(function() {
+                                tbl_sub.ajax.reload(function () {
                                     $("#grand_total").text($("#span-gt").data('gt'));
                                 });
                             }
@@ -1201,14 +1262,13 @@
                         showError(msg);
                     }
                 },
-                error: function(xhr, ajaxOptions, thrownError) {
+                error: function (xhr, ajaxOptions, thrownError) {
                     showError(thrownError);
                 }
             })
         })
-
         // CKEDitor Reinitialize
-        $('#modaldetail').on('shown.bs.modal', function() {
+        $('#modaldetail').on('shown.bs.modal', function () {
             if (editorInstance) {
                 editorInstance.destroy().then(() => {
                     initializeEditor();
@@ -1220,7 +1280,7 @@
             }
         });
 
-        $('#modaldetail').on('hidden.bs.modal', function() {
+        $('#modaldetail').on('hidden.bs.modal', function () {
             if (editorInstance) {
                 editorInstance.destroy().then(() => {
                     editorInstance = null;
@@ -1231,12 +1291,12 @@
         });
 
         // Synchronize Button
-        $("#confirm-sync").on('click', function() {
+        $("#confirm-sync").on('click', function () {
             let link = "";
             let id = "";
             let ip = "";
             let port = "";
-            $(".re-set").each(function() {
+            $(".re-set").each(function () {
                 let k = $(this).attr('key');
                 let v = $(this).attr('vals');
                 if (k == 'link') {
@@ -1265,7 +1325,7 @@
                     port: port
                 },
                 dataType: 'json',
-                success: function(res) {
+                success: function (res) {
                     $("#csrf_token").val(encrypter(res.csrfToken));
                     let row = res.row;
                     let machineid = row['id'];
@@ -1293,7 +1353,7 @@
                         message: `<span style="margin-left: 10px;">Collecting attendance data on ${machinename} at the ${branchname} branch</span><input type='hidden' class='hidden-machineids' value='${machineid}'>`
                     })
                 },
-                error: function(xhr, ajaxOptions, thrownError) {
+                error: function (xhr, ajaxOptions, thrownError) {
                     showError(thrownError);
                     $('#modalsync .modal-body > div:first-child').html(old_body);
                     $('#modalsync .modal-header').css('display', 'flex');
@@ -1314,7 +1374,7 @@
                 <?= csrf_token() ?>: decrypter($("#csrf_token").val())
             },
             dataType: 'json',
-            success: function(res) {
+            success: function (res) {
                 $("#csrf_token").val(encrypter(res.csrfToken));
                 let arr = res.notif;
                 let unread = 0;
@@ -1352,7 +1412,7 @@
                     if (linksplit[0] == 'attmachine') {
                         // custom_notyf.dismissAll();
                         let macid = linksplit[1];
-                        $(".hidden-machineids").each(function() {
+                        $(".hidden-machineids").each(function () {
                             if ($(this).val() == macid) {
                                 $(this).parent('.notyf__message').parent('.notyf__wrapper').find('.notyf__dismiss').children('.notyf__dismiss-btn').trigger('click');
                                 let dmac = $("#dashboardmachines").val();
@@ -1366,7 +1426,7 @@
                 $(".badge-notif").text(unread)
 
             },
-            error: function(xhr, ajaxOptions, thrownError) {
+            error: function (xhr, ajaxOptions, thrownError) {
                 showError(thrownError);
             }
         })
@@ -1385,7 +1445,7 @@
                 <?= csrf_token() ?>: decrypter($("#csrf_token").val()),
             },
             dataType: 'json',
-            success: function(res) {
+            success: function (res) {
                 $("#csrf_token").val(encrypter(res.csrfToken));
                 if (res.type == 'single') {
                     window.location.href = "<?= base_url() ?>" + url
@@ -1404,7 +1464,7 @@
                 <?= csrf_token() ?>: decrypter($("#csrf_token").val())
             },
             dataType: 'json',
-            success: function(res) {
+            success: function (res) {
                 let arr = res.data;
                 $("#csrf_token").val(encrypter(res.csrfToken));
                 $("#list-company").html("");
@@ -1435,7 +1495,7 @@
             },
             type: 'post',
             dataType: 'json',
-            success: function(res) {
+            success: function (res) {
                 $("#csrf_token").val(encrypter(res.csrfToken));
                 window.location.reload()
             },
@@ -1582,12 +1642,12 @@
                 type: "post",
                 dataType: "json",
                 delay: 250,
-                data: function(params) {
+                data: function (params) {
                     datas.searchTerm = params.term;
                     datas.<?= csrf_token() ?> = decrypter($("#csrf_token").val());
                     return datas;
                 },
-                processResults: function(response) {
+                processResults: function (response) {
                     $("#csrf_token").val(encrypter(response.csrfToken));
                     return {
                         results: response.data,
@@ -1597,7 +1657,7 @@
             };
         }
         $(element).select2(setting_select);
-        $(element).on('select2:open', function() {
+        $(element).on('select2:open', function () {
             $(this).select2('focus');
         });
     }
@@ -1613,7 +1673,7 @@
             },
             type: 'post',
             dataType: 'json',
-            success: function(res) {
+            success: function (res) {
                 $("#csrf_token").val(encrypter(res.csrfToken));
                 $("#tab-approval").html(res.view);
             },
@@ -1633,7 +1693,7 @@
                 invoice: $('#isinvoice').val(),
                 btaction: noact,
             },
-            success: function(res) {
+            success: function (res) {
                 $("#csrf_token").val(encrypter(res.csrfToken));
                 $("#tab-file").html(res.view);
             }
@@ -1654,7 +1714,7 @@
 
     function formRequired(form) {
         var reqField = [];
-        $(`${form} input, ${form} select, ${form} textarea`).each(function(i, e) {
+        $(`${form} input, ${form} select, ${form} textarea`).each(function (i, e) {
             if ($(e).attr('required') !== undefined) {
                 var fieldName = $(e).attr('fieldname');
                 if ($(e).val() == null || $(e).val() == "" || $(e).val() == '[]') {
@@ -1671,7 +1731,7 @@
     }
 
     let FormsBuilder = {
-        initSelect2: function(options = {}) {
+        initSelect2: function (options = {}) {
             let selector = options.selector !== undefined ? options.selector : '[data-toggle="select2"]';
 
             let $el = $(this);
@@ -1736,7 +1796,7 @@
                 document.querySelector('.select2-search__field').focus();
             });
         },
-        filterPills: function(options = {}, value = null) {
+        filterPills: function (options = {}, value = null) {
             let $elements = $(this);
             if (options.selector !== undefined) $elements = $(options.selector);
 
@@ -1788,7 +1848,7 @@
             let data = options.data !== undefined ? options.data : {};
             if (typeof data === 'function') data = data({});
 
-            let onChange = options.onChange !== undefined ? options.onChange : () => {};
+            let onChange = options.onChange !== undefined ? options.onChange : () => { };
             let processResults = options.processResults !== undefined ? options.processResults : (res) => res;
 
 
@@ -1843,7 +1903,7 @@
                         if (status.count_results > 0)
                             $pillStatus.append(
                                 $('<span>').addClass('pill-badge')
-                                .text(status.count_results <= 99 ? status.count_results : '99+')
+                                    .text(status.count_results <= 99 ? status.count_results : '99+')
                             );
 
                         $pillStatus.on('click', () => {
@@ -2004,7 +2064,7 @@
         }
         $(input).typeahead({
             items: 10,
-            source: function(query, result) {
+            source: function (query, result) {
                 $.ajax({
                     url: url,
                     method: "POST",
@@ -2014,8 +2074,8 @@
                         <?= csrf_token() ?>: decrypter($('#csrf_token').val())
                     },
                     dataType: "json",
-                    success: function(data) {
-                        result($.map(data['data'], function(item) {
+                    success: function (data) {
+                        result($.map(data['data'], function (item) {
                             return {
                                 id: item.id,
                                 name: item.text,
@@ -2026,7 +2086,7 @@
                     }
                 })
             },
-            afterSelect: function(item) {
+            afterSelect: function (item) {
                 if (datas.stocktype !== 'undefined') {
                     $(datas.stocktype).val(item.stocktype)
                     $(datas.stocktype).trigger('change')
@@ -2057,7 +2117,7 @@
     }
 
     function setupTransdateInput() {
-        $(".transaction-date").each(function() {
+        $(".transaction-date").each(function () {
             $(this).attr("onblur", "validatePeriod(this)");
         });
     }
@@ -2074,7 +2134,7 @@
                     tanggal: isi,
                     <?= csrf_token() ?>: decrypter($("#csrf_token").val())
                 },
-                success: function(res) {
+                success: function (res) {
                     $("#csrf_token").val(encrypter(res.csrfToken));
                     if (res.iserror == 'true') {
                         $(elem).closest('div.form-group').find('small.transaction-date-error').html(`Date <b>${res.tanggal}</b> is not valid. Periode ${res.periode} is closed`);
@@ -2108,3 +2168,4 @@
         return teks;
     }
 </script>
+

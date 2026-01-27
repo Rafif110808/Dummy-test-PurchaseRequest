@@ -20,145 +20,144 @@ class MPurchaseRequestHd extends Model
         'isactive'
     ];
     protected $builder;
-    
+
     public function __construct()
     {
         parent::__construct();
         $this->db = db_connect();
-        
-        // Initialize builder for datatable
+
         $this->builder = $this->db->table('trpurchaserequesthd as pr')
             ->select('pr.*')
             ->select('ms.suppliername')
             ->join('mssupplier as ms', 'pr.supplierid = ms.id', 'left')
             ->where('pr.isactive', true);
     }
-    
-    /**
-     * Searchable columns for datatable
-     * @return array
-     */
+
     public function searchable()
     {
         return [
-            null,                   // No
-            'pr.transcode',         // PR Number
-            'pr.transdate',         // Request Date
-            'ms.suppliername',      // Supplier
-            'pr.description',       // Description
-            null                    // Actions
+            null,
+            'pr.transcode',
+            'pr.transdate',
+            'ms.suppliername',
+            'pr.description',
+            null
         ];
     }
-    
-    /**
-     * Get builder for datatable
-     * @return object
-     */
+
     public function datatable()
     {
-        return $this->builder;
+        return $this->db->table('trpurchaserequesthd as pr')
+            ->select('pr.*, ms.suppliername')
+            ->join('mssupplier as ms', 'pr.supplierid = ms.id', 'left')
+            ->where('pr.isactive', true);
     }
-    
+
     /**
-     * Get one Purchase Request by ID
-     * @param int $id
-     * @return array
+     * 
+     * @param mixed $filter - ID, supplierid, atau null (untuk getAll)
+     * @param string $filterType - 'id', 'supplier', 'daterange', atau 'all'
+     * @param mixed $endDate - Untuk daterange (optional)
+     * @param bool $withDetails - Include details atau tidak
+     * 
+     * Contoh penggunaan:
+     * - get(5, 'id') → Get by ID (sama dengan getOne(5))
+     * - get(10, 'supplier') → Get by supplier (sama dengan getBySupplier(10))
+     * - get('2024-01-01', 'daterange', '2024-12-31') → Get by date range
+     * - get(null, 'all') → Get all (sama dengan getAll())
+     * - get(5, 'id', null, true) → Get by ID with details (sama dengan getWithDetails(5))
+     */
+    public function get($filter = null, $filterType = 'all', $endDate = null, $withDetails = false)
+    {
+        $builder = $this->db->table('trpurchaserequesthd as pr')
+            ->select('pr.*')
+            ->select('ms.suppliername')
+            ->join('mssupplier as ms', 'pr.supplierid = ms.id', 'left')
+            ->where('pr.isactive', true);
+
+        // Apply filter berdasarkan type
+        switch ($filterType) {
+            case 'id':
+                $builder->where('pr.id', $filter);
+                $result = $builder->get()->getRowArray();
+                
+                // Jika withDetails = true, ambil juga detail
+                if ($withDetails && !empty($result)) {
+                    $result['details'] = $this->db->table('trpurchaserequestdt as prd')
+                        ->select('prd.*')
+                        ->select('mp.productname')
+                        ->select('mu.uomnm')
+                        ->join('msproduct as mp', 'prd.productid = mp.id', 'left')
+                        ->join('msuom as mu', 'prd.uomid = mu.id', 'left')
+                        ->where('prd.headerid', $filter)
+                        ->where('prd.isactive', true)
+                        ->get()
+                        ->getResultArray();
+                }
+                return $result;
+
+            case 'supplier':
+                $builder->where('pr.supplierid', $filter);
+                $builder->orderBy('pr.transdate', 'DESC');
+                return $builder->get()->getResultArray();
+
+            case 'daterange':
+                if (empty($filter) || empty($endDate)) {
+                    return [];
+                }
+                $builder->where('pr.transdate >=', $filter);
+                $builder->where('pr.transdate <=', $endDate);
+                $builder->orderBy('pr.transdate', 'DESC');
+                return $builder->get()->getResultArray();
+
+            case 'all':
+            default:
+                $builder->orderBy('pr.transdate', 'DESC');
+                return $builder->get()->getResultArray();
+        }
+    }
+
+    /**
+     * Wrapper methods untuk backward compatibility
      */
     public function getOne($id)
     {
-        return $this->db->table('trpurchaserequesthd as pr')
-            ->select('pr.*')
-            ->select('ms.suppliername')
-            ->join('mssupplier as ms', 'pr.supplierid = ms.id', 'left')
-            ->where('pr.id', $id)
-            ->where('pr.isactive', true)
-            ->get()
-            ->getRowArray();
+        return $this->get($id, 'id');
     }
-    
-    /**
-     * Get all active Purchase Requests
-     * @return array
-     */
+
     public function getAll()
     {
-        return $this->db->table('trpurchaserequesthd as pr')
-            ->select('pr.*')
-            ->select('ms.suppliername')
-            ->join('mssupplier as ms', 'pr.supplierid = ms.id', 'left')
-            ->where('pr.isactive', true)
-            ->orderBy('pr.transdate', 'DESC')
-            ->get()
-            ->getResultArray();
+        return $this->get(null, 'all');
     }
-    
-    /**
-     * Get Purchase Requests by supplier
-     * @param int $supplierId
-     * @return array
-     */
+
     public function getBySupplier($supplierId)
     {
-        return $this->db->table('trpurchaserequesthd as pr')
-            ->select('pr.*')
-            ->select('ms.suppliername')
-            ->join('mssupplier as ms', 'pr.supplierid = ms.id', 'left')
-            ->where('pr.supplierid', $supplierId)
-            ->where('pr.isactive', true)
-            ->orderBy('pr.transdate', 'DESC')
-            ->get()
-            ->getResultArray();
+        return $this->get($supplierId, 'supplier');
     }
-    
-    /**
-     * Get Purchase Requests by date range
-     * @param string $startDate
-     * @param string $endDate
-     * @return array
-     */
+
     public function getByDateRange($startDate, $endDate)
     {
-        return $this->db->table('trpurchaserequesthd as pr')
-            ->select('pr.*')
-            ->select('ms.suppliername')
-            ->join('mssupplier as ms', 'pr.supplierid = ms.id', 'left')
-            ->where('pr.transdate >=', $startDate)
-            ->where('pr.transdate <=', $endDate)
-            ->where('pr.isactive', true)
-            ->orderBy('pr.transdate', 'DESC')
-            ->get()
-            ->getResultArray();
+        return $this->get($startDate, 'daterange', $endDate);
     }
-    
-    /**
-     * Store new Purchase Request
-     * @param array $data
-     * @return int|bool Insert ID or false
-     */
+
+    public function getWithDetails($id)
+    {
+        return $this->get($id, 'id', null, true);
+    }
+
     public function store($data)
     {
         $insert = $this->db->table($this->table)->insert($data);
         return $insert ? $this->db->insertID() : false;
     }
-    
-    /**
-     * Update Purchase Request
-     * @param array $data
-     * @param int $id
-     * @return bool
-     */
+
     public function edit($data, $id)
     {
         return $this->db->table($this->table)
             ->where('id', $id)
             ->update($data);
     }
-    
-    /**
-     * Soft delete Purchase Request
-     * @param int $id
-     * @return bool
-     */
+
     public function softDestroy($id)
     {
         return $this->db->table($this->table)
@@ -169,43 +168,20 @@ class MPurchaseRequestHd extends Model
                 'updateddate' => date('Y-m-d H:i:s')
             ]);
     }
-    
-    /**
-     * Hard delete Purchase Request
-     * @param int $id
-     * @return bool
-     */
-    public function destroy($id)
-    {
-        return $this->db->table($this->table)
-            ->where('id', $id)
-            ->delete();
-    }
-    
-    /**
-     * Check if transcode exists
-     * @param string $transcode
-     * @param int|null $excludeId
-     * @return bool
-     */
+
     public function transcodeExists($transcode, $excludeId = null)
     {
         $builder = $this->db->table($this->table)
             ->where('transcode', $transcode)
             ->where('isactive', true);
-        
+
         if ($excludeId) {
             $builder->where('id !=', $excludeId);
         }
-        
+
         return $builder->countAllResults() > 0;
     }
-    
-    /**
-     * Get latest transcode
-     * @param string $prefix
-     * @return string|null
-     */
+
     public function getLatestTranscode($prefix = 'PR')
     {
         $result = $this->db->table($this->table)
@@ -215,72 +191,36 @@ class MPurchaseRequestHd extends Model
             ->limit(1)
             ->get()
             ->getRowArray();
-        
+
         return $result['transcode'] ?? null;
     }
-    
-    /**
-     * Generate next transcode
-     * @param string $prefix
-     * @return string
-     */
+
     public function generateTranscode($prefix = 'PR')
     {
         $latest = $this->getLatestTranscode($prefix);
-        
+
         if ($latest) {
-            // Extract number from latest transcode (e.g., PR-2024-0001 -> 0001)
             $parts = explode('-', $latest);
             $number = intval(end($parts)) + 1;
         } else {
             $number = 1;
         }
-        
-        // Format: PR-YYYY-NNNN
+
         $year = date('Y');
         $transcode = sprintf('%s-%s-%04d', $prefix, $year, $number);
-        
+
         return $transcode;
     }
-    
-    /**
-     * Get total records count
-     * @return int
-     */
+
     public function getTotalRecords()
     {
         return $this->db->table($this->table)
             ->where('isactive', true)
             ->countAllResults();
     }
-    
-    /**
-     * Get Purchase Request with details
-     * @param int $id
-     * @return array
-     */
-    public function getWithDetails($id)
+
+    public function destroy($column, $value)
     {
-        $header = $this->getOne($id);
-        
-        if (empty($header)) {
-            return [];
-        }
-        
-        // Get details
-        $details = $this->db->table('trpurchaserequestdt as prd')
-            ->select('prd.*')
-            ->select('mp.productname')
-            ->select('mu.uomnm')
-            ->join('msproduct as mp', 'prd.productid = mp.id', 'left')
-            ->join('msuom as mu', 'prd.uomid = mu.id', 'left')
-            ->where('prd.headerid', $id)
-            ->where('prd.isactive', true)
-            ->get()
-            ->getResultArray();
-        
-        $header['details'] = $details;
-        
-        return $header;
+        return $this->db->table('trpurchaserequesthd')->delete([$column => $value]);
     }
 }
