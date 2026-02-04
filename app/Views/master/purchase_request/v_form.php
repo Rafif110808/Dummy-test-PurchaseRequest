@@ -89,15 +89,15 @@
                 rows="3"><?= ($form_type == 'edit') ? esc($header['description']) : '' ?></textarea>
         </div>
 
-        <div class="modal-footer px-0 pb-0">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="$('#modalAdd').modal('hide')">
+        <div class="d-flex justify-content-end gap-2 mt-4">
+            <a href="<?= base_url('purchase-request') ?>" class="btn btn-sm btn-secondary">
                 <i class="bx bx-x"></i> Cancel
-            </button>
-            <button type="button" class="btn btn-warning btn-sm" onclick="resetForm('form-purchaserequest')">
+            </a>
+            <button type="reset" class="btn btn-sm btn-warning">
                 <i class="bx bx-revision"></i> Reset
             </button>
-            <button type="submit" id="btn-submit" class="btn btn-primary btn-sm">
-                <i class="bx bx-check"></i> <?= ($form_type == 'edit' ? 'Update' : 'Save') ?>
+            <button type="submit" id="btn-submit" class="btn btn-sm btn-primary">
+                <i class="bx bx-check"></i> Save
             </button>
         </div>
     </form>
@@ -280,7 +280,7 @@
             });
 
 
-            
+
             // ==================== GANTI DENGAN KODE CALLBACK INI ====================
             // Callback setelah delete detail berhasil (dipanggil oleh modalDelete)
             window.afterDeleteDetail = function () {
@@ -529,57 +529,57 @@
         }, 300);
     }
 
-   <?php if ($form_type == 'edit'): ?>
-    // ==================== INITIALIZE DATATABLE FOR DETAILS ====================
-    function initializeDetailsTable() {
-        if ($.fn.DataTable.isDataTable('#detailsTable')) {
-            $('#detailsTable').DataTable().destroy();
-        }
+    <?php if ($form_type == 'edit'): ?>
+        // ==================== INITIALIZE DATATABLE FOR DETAILS ====================
+        function initializeDetailsTable() {
+            if ($.fn.DataTable.isDataTable('#detailsTable')) {
+                $('#detailsTable').DataTable().destroy();
+            }
 
-        window.detailsTbl = $('#detailsTable').DataTable({
-            serverSide: true,
-            processing: true,
-            autoWidth: false,
-            scrollX: true,
-            language: {
-                processing: '<i class="bx bx-loader-alt bx-spin"></i> Loading...',
-                emptyTable: 'Belum ada data detail',
-                zeroRecords: 'Data tidak ditemukan'
-            },
-            ajax: {
-                url: "<?= getURL('purchase-request/getdetailsajax') ?>",
-                type: "POST",
-                data: function (d) {
-                    d.headerId = '<?= encrypting($header['id']) ?>';
-                    d.<?= csrf_token() ?> = $('#csrf_token_form').val();
+            window.detailsTbl = $('#detailsTable').DataTable({
+                serverSide: true,
+                processing: true,
+                autoWidth: false,
+                scrollX: true,
+                language: {
+                    processing: '<i class="bx bx-loader-alt bx-spin"></i> Loading...',
+                    emptyTable: 'Belum ada data detail',
+                    zeroRecords: 'Data tidak ditemukan'
                 },
-                error: function(xhr, error, code) {
-                    console.error('DataTable error:', error, code);
-                    showNotif('error', 'Gagal memuat data detail');
-                }
-            },
-            columns: [
-                { data: 0, width: '5%', orderable: false, className: 'text-center' },
-                { data: 1, width: '40%' },
-                { data: 2, width: '15%' },
-                { data: 3, width: '15%', className: 'text-right' },
-                { data: 4, width: '15%', orderable: false, className: 'text-center' }
-            ],
-            pageLength: 10,
-            lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]]
-        });
-    }
-
-    // ==================== CALLBACK UNTUK RELOAD DETAIL TABLE SETELAH DELETE ====================
-    window.afterDeleteDetail = function() {
-        console.log('Reloading detail table after delete');
-        
-        // Reload DataTable detail dengan server-side processing
-        if (typeof detailsTbl !== 'undefined' && detailsTbl) {
-            detailsTbl.ajax.reload(null, false); // false = stay on current page
+                ajax: {
+                    url: "<?= getURL('purchase-request/getdetailsajax') ?>",
+                    type: "POST",
+                    data: function (d) {
+                        d.headerId = '<?= encrypting($header['id']) ?>';
+                        d.<?= csrf_token() ?> = $('#csrf_token_form').val();
+                    },
+                    error: function (xhr, error, code) {
+                        console.error('DataTable error:', error, code);
+                        showNotif('error', 'Gagal memuat data detail');
+                    }
+                },
+                columns: [
+                    { data: 0, width: '5%', orderable: false, className: 'text-center' },
+                    { data: 1, width: '40%' },
+                    { data: 2, width: '15%' },
+                    { data: 3, width: '15%', className: 'text-right' },
+                    { data: 4, width: '15%', orderable: false, className: 'text-center' }
+                ],
+                pageLength: 10,
+                lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]]
+            });
         }
-    };
-<?php endif ?>
+
+        // ==================== CALLBACK UNTUK RELOAD DETAIL TABLE SETELAH DELETE ====================
+        window.afterDeleteDetail = function () {
+            console.log('Reloading detail table after delete');
+
+            // Reload DataTable detail dengan server-side processing
+            if (typeof detailsTbl !== 'undefined' && detailsTbl) {
+                detailsTbl.ajax.reload(null, false); // false = stay on current page
+            }
+        };
+    <?php endif ?>
 
     // Tambahkan di bagian atas script jika belum ada
     if (typeof showNotif !== 'function') {

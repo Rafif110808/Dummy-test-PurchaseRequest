@@ -121,22 +121,45 @@ $routes->group('product', function ($routes) {
 $routes->group('purchase-request', function ($routes) {
     $routes->add('', 'PurchaseRequest::index', $this->noauth);
     $routes->add('datatable', 'PurchaseRequest::datatable', $this->noauth);
-    $routes->add('form', 'PurchaseRequest::form', $this->noauth);
-    $routes->add('form/(:any)', 'PurchaseRequest::form/$1', $this->noauth);
+
+    //  INI (alias untuk backward compatibility)
+    $routes->add('table', 'PurchaseRequest::datatable', $this->noauth);
+
+    //  NEW: Halaman add/edit (bukan modal)
+    $routes->add('add-page', 'PurchaseRequest::add_page', $this->noauth);
+    $routes->add('edit-page/(:any)', 'PurchaseRequest::edit_page/$1', $this->noauth);
+
+    // Print PDF
+    $routes->add('print-pdf/(:any)', 'PurchaseRequest::print_pdf/$1', $this->noauth);
+
+    // Export Excel
+    $routes->get('export-excel/(:any)', 'PurchaseRequest::export_excel/$1');
+
+    //  Dari GET ke POST (atau pakai 'add' yang support semua method)
+    $routes->post('export-excel-all', 'PurchaseRequest::exportExcelAll', $this->noauth);
+    $routes->get('get_chunk', 'PurchaseRequest::get_chunk', $this->noauth);
+
+    // Modal untuk edit detail
     $routes->add('add', 'PurchaseRequest::add', $this->noauth);
     $routes->add('update', 'PurchaseRequest::update', $this->noauth);
     $routes->add('delete', 'PurchaseRequest::delete', $this->noauth);
-    $routes->add('store', 'PurchaseRequest::store', $this->noauth);
-    $routes->add('search-supplier', 'PurchaseRequest::searchSupplier', $this->noauth);
-    $routes->add('search-product', 'PurchaseRequest::searchProduct', $this->noauth);
-    $routes->add('search-uom', 'PurchaseRequest::searchUom', $this->noauth);
+
+    // Detail operations
     $routes->add('adddetail', 'PurchaseRequest::addDetail');
     $routes->add('updatedetail', 'PurchaseRequest::updateDetail');
     $routes->add('deletedetail', 'PurchaseRequest::deleteDetail');
     $routes->add('getdetailsajax', 'PurchaseRequest::getDetailsAjax');
-    // Quick fix alias: map /purchase-request/table to datatable
-    $routes->add('table', 'PurchaseRequest::datatable', $this->noauth);
+
+
+    // Search endpoints
+    $routes->add('search-supplier', 'PurchaseRequest::searchSupplier', $this->noauth);
+    $routes->add('search-product', 'PurchaseRequest::searchProduct', $this->noauth);
+    $routes->add('search-uom', 'PurchaseRequest::searchUom', $this->noauth);
+
+    $routes->post('form_edit_detail/(:any)', 'PurchaseRequest::form_edit_detail/$1');
+
 });
+//bismillah bisa ya rabb bantu hamba
 
 
 

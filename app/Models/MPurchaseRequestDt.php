@@ -116,7 +116,7 @@ class MPurchaseRequestDt extends Model
     }
 
     /**
-     * ✅ REFACTORED: Universal Destroy Method
+     *  REFACTORED: Universal Destroy Method
      * @param mixed $identifier - ID atau headerid
      * @param string $type - 'soft' atau 'hard' (default: 'hard')
      * @param string $by - 'id' atau 'header' (default: 'id')
@@ -170,74 +170,82 @@ class MPurchaseRequestDt extends Model
         return $this->destroy($headerId, 'hard', 'header');
     }
 
-    public function getDetailsAjaxData($headerId, $search = '', $start = 0, $length = 10)
-    {
-        $builder = $this->db->table('trpurchaserequestdt as prd')
-            ->select('prd.*')
-            ->select('mp.productname')
-            ->select('mu.uomnm')
-            ->join('msproduct as mp', 'prd.productid = mp.id', 'left')
-            ->join('msuom as mu', 'prd.uomid = mu.id', 'left')
-            ->where('prd.headerid', $headerId)
-            ->where('prd.isactive', true);
+  public function getDetailsAjaxData($headerId, $search = '', $start = 0, $length = 10)
+{
+    $builder = $this->db->table('trpurchaserequestdt as prd')
+        ->select('prd.*')
+        ->select('mp.productname')
+        ->select('mu.uomnm')
+        ->join('msproduct as mp', 'prd.productid = mp.id', 'left')
+        ->join('msuom as mu', 'prd.uomid = mu.id', 'left')
+        ->where('prd.headerid', $headerId)
+        ->where('prd.isactive', true);
 
-        if (!empty($search)) {
-            $builder->groupStart()
-                ->like('LOWER(mp.productname)', strtolower($search))
-                ->orLike('LOWER(mu.uomnm)', strtolower($search))
-                ->orLike('CAST(prd.qty AS TEXT)', $search)
-                ->groupEnd();
-        }
-
-        $totalRecords = $builder->countAllResults(false);
-        $builder->limit($length, $start);
-        $data = $builder->get()->getResultArray();
-
-        $mappedData = [];
-        $currentIndex = $start;
-
-        foreach ($data as $row) {
-            $safeProductName = htmlspecialchars($row['productname'], ENT_QUOTES, 'UTF-8');
-            $safeUomName = htmlspecialchars($row['uomnm'] ?? '', ENT_QUOTES, 'UTF-8');
-
-            $formattedQtyForInput = (floor($row['qty']) == $row['qty'])
-                ? number_format($row['qty'], 0)
-                : number_format($row['qty'], 2);
-
-            $btnEdit = "<button class='btn btn-sm btn-warning btn-edit-detail'
-                        data-id='" . $row['id'] . "'
-                        data-productid='" . $row['productid'] . "'
-                        data-uomid='" . ($row['uomid'] ?? '') . "'
-                        data-qty='" . $formattedQtyForInput . "'
-                        data-productname='" . $safeProductName . "'
-                        data-uomname='" . $safeUomName . "'>
-                        <i class='bx bx-edit-alt'></i>
-                    </button>";
-
-            $btnDelete = "<button type='button' class='btn btn-sm btn-danger' 
-                onclick=\"modalDelete('Delete Detail - " . $safeProductName . "', {'link':'" . getURL('purchase-request/deletedetail') . "', 'id':'" . encrypting($row['id']) . "', 'pagetype':'detailtable'})\">
-                <i class='bx bx-trash'></i>
-              </button>";
-
-            $formattedQty = (floor($row['qty']) == $row['qty'])
-                ? number_format($row['qty'], 0)
-                : number_format($row['qty'], 2);
-
-            $mappedData[] = [
-                $currentIndex + 1,
-                esc($row['productname']),
-                esc($row['uomnm'] ?? '-'),
-                $formattedQty,
-                "<div class='text-center'>{$btnEdit} {$btnDelete}</div>"
-            ];
-            $currentIndex++;
-        }
-
-        return [
-            'totalRecords' => $totalRecords,
-            'data' => $mappedData
-        ];
+    if (!empty($search)) {
+        $builder->groupStart()
+            ->like('LOWER(mp.productname)', strtolower($search))
+            ->orLike('LOWER(mu.uomnm)', strtolower($search))
+            ->orLike('CAST(prd.qty AS TEXT)', $search)
+            ->groupEnd();
     }
+
+    $totalRecords = $builder->countAllResults(false);
+    $builder->limit($length, $start);
+    $data = $builder->get()->getResultArray();
+
+    $mappedData = [];
+    $currentIndex = $start;
+
+    foreach ($data as $row) {
+        $safeProductName = htmlspecialchars($row['productname'], ENT_QUOTES, 'UTF-8');
+        $safeUomName = htmlspecialchars($row['uomnm'] ?? '', ENT_QUOTES, 'UTF-8');
+
+        $formattedQtyForInput = (floor($row['qty']) == $row['qty'])
+            ? number_format($row['qty'], 0)
+            : number_format($row['qty'], 2);
+
+        //  FIX: Encrypt ID untuk edit button
+        $encryptedId = encrypting($row['id']);
+
+        $btnEdit = "<button class='btn btn-sm btn-warning btn-edit-detail'
+                    data-id='" . $row['id'] . "'
+                    data-id-encrypted='" . $encryptedId . "'
+                    data-productid='" . $row['productid'] . "'
+                    data-uomid='" . ($row['uomid'] ?? '') . "'
+                    data-qty='" . $formattedQtyForInput . "'
+                    data-productname='" . $safeProductName . "'
+                    data-uomname='" . $safeUomName . "'>
+                    <i class='bx bx-edit-alt'></i>
+                </button>";
+
+        $btnDelete = "<button type='button' class='btn btn-sm btn-danger' 
+            onclick=\"modalDelete('Delete Detail - " . $safeProductName . "', {
+                'link':'" . getURL('purchase-request/deletedetail') . "', 
+                'id':'" . encrypting($row['id']) . "', 
+                'pagetype':'detailtable'
+            })\">
+            <i class='bx bx-trash'></i>
+          </button>";
+
+        $formattedQty = (floor($row['qty']) == $row['qty'])
+            ? number_format($row['qty'], 0)
+            : number_format($row['qty'], 2);
+
+        $mappedData[] = [
+            $currentIndex + 1,
+            esc($row['productname']),
+            esc($row['uomnm'] ?? '-'),
+            $formattedQty,
+            "<div class='text-center'>{$btnEdit} {$btnDelete}</div>"
+        ];
+        $currentIndex++;
+    }
+
+    return [
+        'totalRecords' => $totalRecords,
+        'data' => $mappedData
+    ];
+}
 
     public function getTotalQtyByProduct($productId)
     {

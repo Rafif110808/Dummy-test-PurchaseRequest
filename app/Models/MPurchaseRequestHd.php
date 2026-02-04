@@ -223,4 +223,17 @@ class MPurchaseRequestHd extends Model
     {
         return $this->db->table('trpurchaserequesthd')->delete([$column => $value]);
     }
+
+    public function getChunk($limit, $offset)
+{
+    return $this->db->table('trpurchaserequesthd as pr')
+        ->select('pr.transcode, pr.transdate, ms.suppliername, pr.description')
+        ->join('mssupplier as ms', 'pr.supplierid = ms.id', 'left')
+        ->where('pr.isactive', true)
+        ->orderBy('pr.id', 'ASC')
+        ->limit($limit, $offset)
+        ->get()
+        ->getResultArray();
+}
+
 }
