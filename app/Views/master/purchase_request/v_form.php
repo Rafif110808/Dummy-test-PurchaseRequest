@@ -20,6 +20,10 @@
         font-weight: 600;
     }
 
+    /* 
+    ===== REQUIRED FIELD INDICATOR =====
+    Menambahkan tanda bintang merah (*) setelah label required
+    */
     .required:after {
         content: " *";
         color: red;
@@ -45,34 +49,76 @@
 <!-- HEADER FORM SECTION -->
 <div class="form-section">
     <h5><i class="bx bx-file"></i> Purchase Request Information</h5>
+    
+    <!-- 
+    ===== FORM PURCHASE REQUEST =====
+    Form untuk input/edit data purchase request header
+    ID: form-purchaserequest (digunakan untuk submit via JavaScript)
+    -->
     <form id="form-purchaserequest" method="post">
+        
+        <!-- 
+        ===== HIDDEN INPUT ID (EDIT MODE) =====
+        Field hidden untuk menyimpan ID saat mode edit
+        Hanya ada jika $form_type == 'edit'
+        -->
         <?php if ($form_type == 'edit'): ?>
             <input type="hidden" name="id" value="<?= encrypting($header['id']) ?>">
         <?php endif ?>
 
         <div class="row">
+            <!-- 
+            ===== FIELD PR NUMBER =====
+            Input untuk nomor Purchase Request
+            REQUIRED: User wajib mengisi field ini
+            -->
             <div class="col-md-6">
                 <div class="form-group">
                     <label class="required">PR Number</label>
-                    <input type="text" class="form-control form-control-sm" id="transcode" name="transcode"
+                    <input 
+                        type="text" 
+                        class="form-control form-control-sm" 
+                        id="transcode" 
+                        name="transcode"
                         value="<?= ($form_type == 'edit') ? esc($header['transcode']) : '' ?>"
-                        placeholder="Enter PR Number" required>
+                        placeholder="Enter PR Number" 
+                        required>
                     <small class="form-text text-muted">Format: PR-YYYY-NNNN</small>
                 </div>
             </div>
 
+            <!-- 
+            ===== FIELD REQUEST DATE =====
+            Input tanggal purchase request
+            REQUIRED: User wajib memilih tanggal
+            -->
             <div class="col-md-6">
                 <div class="form-group">
                     <label class="required">Request Date</label>
-                    <input type="date" class="form-control form-control-sm" id="transdate" name="transdate"
-                        value="<?= ($form_type == 'edit') ? $header['transdate'] : date('Y-m-d') ?>" required>
+                    <input 
+                        type="date" 
+                        class="form-control form-control-sm" 
+                        id="transdate" 
+                        name="transdate"
+                        value="<?= ($form_type == 'edit') ? $header['transdate'] : date('Y-m-d') ?>" 
+                        required>
                 </div>
             </div>
         </div>
 
+        <!-- 
+        ===== FIELD SUPPLIER =====
+        Select2 dropdown untuk memilih supplier
+        REQUIRED: User wajib memilih supplier
+        -->
         <div class="form-group">
             <label class="required">Supplier</label>
-            <select class="form-control form-control-sm" id="supplierid" name="supplierid" required style="width:100%">
+            <select 
+                class="form-control form-control-sm" 
+                id="supplierid" 
+                name="supplierid" 
+                required 
+                style="width:100%">
                 <option value="">Select Supplier</option>
                 <?php if ($form_type == 'edit' && !empty($header['supplierid'])): ?>
                     <option value="<?= $header['supplierid'] ?>" selected>
@@ -82,20 +128,37 @@
             </select>
         </div>
 
+        <!-- 
+        ===== FIELD DESCRIPTION =====
+        Textarea untuk keterangan/deskripsi
+        OPTIONAL: Tidak wajib diisi
+        -->
         <div class="form-group">
             <label>Description</label>
-            <textarea class="form-control form-control-sm" id="description" name="description"
+            <textarea 
+                class="form-control form-control-sm" 
+                id="description" 
+                name="description"
                 placeholder="Enter description (optional)"
                 rows="3"><?= ($form_type == 'edit') ? esc($header['description']) : '' ?></textarea>
         </div>
 
+        <!-- 
+        ===== TOMBOL AKSI FORM =====
+        Tombol Cancel, Reset, dan Save
+        -->
         <div class="d-flex justify-content-end gap-2 mt-4">
+            <!-- Tombol Cancel: redirect ke halaman list -->
             <a href="<?= base_url('purchase-request') ?>" class="btn btn-sm btn-secondary">
                 <i class="bx bx-x"></i> Cancel
             </a>
+            
+            <!-- Tombol Reset: reset form ke nilai awal -->
             <button type="reset" class="btn btn-sm btn-warning">
                 <i class="bx bx-revision"></i> Reset
             </button>
+            
+            <!-- Tombol Save: submit form -->
             <button type="submit" id="btn-submit" class="btn btn-sm btn-primary">
                 <i class="bx bx-check"></i> Save
             </button>
@@ -182,34 +245,74 @@
         // Initialize Select2 for all dropdowns
         initializeSelect2();
 
-        // ==================== HANDLE FORM SUBMIT FOR HEADER ====================
+        /*
+        ===== HANDLE FORM SUBMIT FOR HEADER =====
+        Event handler untuk submit form purchase request
+        Menggunakan AJAX untuk submit tanpa reload halaman
+        */
         $('#form-purchaserequest').off('submit').on('submit', function (e) {
-            e.preventDefault();
+            e.preventDefault(); // Prevent default form submission
             const $form = $(this);
             const $btn = $('#btn-submit');
 
-            // Validasi form
+            /*
+            ===== VALIDASI FORM HTML5 =====
+            Cek validasi required fields menggunakan HTML5 validation
+            Jika ada field required yang kosong, tampilkan pesan error browser
+            */
             if (!$form[0].checkValidity()) {
-                $form[0].reportValidity();
-                return;
+                $form[0].reportValidity(); // Tampilkan pesan error validasi
+                return; // Stop submit jika validasi gagal
             }
 
-            // Disable submit button
+            /*
+            ===== VALIDASI MANUAL UNTUK SELECT2 =====
+            HTML5 validation kadang tidak work untuk Select2
+            Jadi kita validasi manual untuk Supplier field
+            */
+            const supplierid = $('#supplierid').val();
+            if (!supplierid) {
+                // Jika supplier belum dipilih, tampilkan alert
+                showNotif('warning', 'Supplier wajib dipilih');
+                $('#supplierid').focus(); // Focus ke field supplier
+                return; // Stop submit
+            }
+
+            /*
+            ===== DISABLE SUBMIT BUTTON =====
+            Prevent double submit dengan disable button dan ubah text
+            */
             $btn.prop('disabled', true).html('<i class="bx bx-loader-alt bx-spin"></i> Saving...');
 
+            /*
+            ===== TENTUKAN URL ENDPOINT =====
+            URL berbeda untuk add dan update
+            */
             const url = '<?= ($form_type == 'edit' ? getURL('purchase-request/update') : getURL('purchase-request/add')) ?>';
 
+            /*
+            ===== AJAX SUBMIT FORM =====
+            Kirim data form ke server via AJAX
+            */
             $.ajax({
                 url: url,
                 type: 'POST',
-                data: $form.serialize(),
+                data: $form.serialize(), // Serialize form data
                 dataType: 'json',
+                
+                /*
+                ===== SUCCESS CALLBACK =====
+                Dipanggil jika submit berhasil
+                */
                 success: function (res) {
                     // Re-enable button
                     $btn.prop('disabled', false).html('<i class="bx bx-check"></i> <?= ($form_type == 'edit' ? 'Update' : 'Save') ?>');
 
                     if (res.sukses == 1) {
-                        // Update CSRF token
+                        /*
+                        ===== UPDATE CSRF TOKEN =====
+                        Token CSRF harus diupdate setiap request untuk keamanan
+                        */
                         if (res.csrfToken) {
                             $('input[name="<?= csrf_token() ?>"]').val(res.csrfToken);
                             if ($('#csrf_token_form').length) {
@@ -217,27 +320,38 @@
                             }
                         }
 
-                        // Tutup modal
+                        // Tutup modal jika ada
                         $('#modalAdd').modal('hide');
 
-                        // Show notification (Notif hijau seperti semula)
+                        // Show notification sukses
                         showNotif('success', res.pesan || 'Data berhasil disimpan');
 
-                        // REDIRECT CEPAT (300ms - cukup buat notif muncul)
+                        /*
+                        ===== REDIRECT KE LIST PAGE =====
+                        Redirect setelah 300ms untuk memberi waktu notifikasi muncul
+                        */
                         setTimeout(function () {
                             window.location.href = '<?= base_url('purchase-request') ?>';
                         }, 300);
 
                     } else {
-                        // Show error notification (pakai showNotif)
+                        // Show error notification jika sukses = 0
                         showNotif('error', res.pesan || 'Gagal menyimpan data');
                     }
                 },
+                
+                /*
+                ===== ERROR CALLBACK =====
+                Dipanggil jika AJAX request gagal
+                */
                 error: function (xhr, status, error) {
                     // Re-enable button
                     $btn.prop('disabled', false).html('<i class="bx bx-check"></i> <?= ($form_type == 'edit' ? 'Update' : 'Save') ?>');
 
-                    // Parse error message
+                    /*
+                    ===== PARSE ERROR MESSAGE =====
+                    Coba parse error dari response JSON
+                    */
                     let errorMsg = 'Terjadi kesalahan sistem';
                     try {
                         const response = JSON.parse(xhr.responseText);
@@ -246,7 +360,7 @@
                         errorMsg = xhr.statusText || errorMsg;
                     }
 
-                    // Show error notification (pakai showNotif)
+                    // Show error notification
                     showNotif('error', errorMsg);
                 }
             });
@@ -279,10 +393,7 @@
                 }
             });
 
-
-
-            // ==================== GANTI DENGAN KODE CALLBACK INI ====================
-            // Callback setelah delete detail berhasil (dipanggil oleh modalDelete)
+            // ==================== CALLBACK SETELAH DELETE DETAIL ====================
             window.afterDeleteDetail = function () {
                 console.log('After delete detail callback');
 
@@ -291,6 +402,7 @@
                     detailsTbl.ajax.reload(null, false);
                 }
             };
+
             // ==================== EDIT DETAIL FUNCTION ====================
             window.editDetail = function (id, productId, uomId, qty, productName = '', uomName = '') {
                 ensureSelectOption($('#productid'), productId, productName);
@@ -403,7 +515,7 @@
                                 detailsTbl.ajax.reload(null, false);
                             }
 
-                            // Show success notification (pakai showNotif)
+                            // Show success notification
                             showNotif('success', res.pesan || (detailId ? 'Detail berhasil diupdate' : 'Detail berhasil ditambahkan'));
                         } else {
                             showNotif('error', res.pesan || 'Terjadi kesalahan');
@@ -581,14 +693,16 @@
         };
     <?php endif ?>
 
-    // Tambahkan di bagian atas script jika belum ada
+    /*
+    ===== FALLBACK NOTIFIKASI FUNCTION =====
+    Jika function showNotif belum ada, buat fallback menggunakan SweetAlert
+    */
     if (typeof showNotif !== 'function') {
         window.showNotif = function (type, message) {
-            // Gunakan Swal sebagai fallback
-            const icon = type === 'success' ? 'success' : 'error';
+            const icon = type === 'success' ? 'success' : (type === 'warning' ? 'warning' : 'error');
             Swal.fire({
                 icon: icon,
-                title: type === 'success' ? 'Berhasil' : 'Gagal',
+                title: type === 'success' ? 'Berhasil' : (type === 'warning' ? 'Peringatan' : 'Gagal'),
                 text: message,
                 timer: 3000,
                 showConfirmButton: false

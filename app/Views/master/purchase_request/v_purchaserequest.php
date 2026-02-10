@@ -1,8 +1,17 @@
 <?= $this->include('template/v_header') ?>
 <?= $this->include('template/v_appbar') ?>
 
-
 <style>
+    /* Fix border menumpuk di DataTables header */
+    table.dataTable>thead>tr>td {
+        border-bottom: none !important;
+    }
+
+    .table-bordered thead td,
+    .table-bordered thead th {
+        border-bottom-width: 1px !important;
+    }
+
     /* Styling untuk tombol print */
     .btn-info {
         background-color: #17a2b8;
@@ -32,101 +41,297 @@
     .bx-printer {
         font-size: 1rem;
     }
+
+    /* Filter Section - IMPROVED */
+    .filter-section {
+        background: #f8f9fa;
+        padding: 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    .filter-row {
+        display: flex;
+        gap: 1rem;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        flex: 1;
+        min-width: 180px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .filter-group label {
+        margin-bottom: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .filter-group input,
+    .filter-group select {
+        width: 100%;
+    }
+    
+    .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: end;
+    }
+
+    .filter-actions .btn {
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    /* Header Actions - IMPROVED */
+    .header-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .header-actions .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .header-actions .btn i {
+        font-size: 1.125rem;
+    }
+
+    /* Button Consistent Styling */
+    .btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+        .filter-row {
+            flex-direction: column;
+        }
+
+        .filter-group {
+            min-width: 100%;
+        }
+        
+        .filter-actions {
+            width: 100%;
+        }
+        
+        .filter-actions .btn {
+            flex: 1;
+        }
+
+        .header-actions {
+            flex-wrap: wrap;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .header-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .header-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Toast Export Style */
+    @keyframes slideInRight {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+
+    .export-toast {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        width: 320px;
+        background: white;
+        border-left: 4px solid #17a2b8;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        padding: 16px;
+        z-index: 9999;
+        animation: slideInRight 0.3s ease-out;
+    }
+
+    .export-toast.closing {
+        animation: slideOutRight 0.3s ease-in;
+    }
+
+    .toast-progress {
+        background: #e9ecef;
+        height: 6px;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    .toast-progress-bar {
+        background: #17a2b8;
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    /* Card header spacing */
+    .card-header {
+        padding: 1.25rem;
+    }
 </style>
 
 <div class="main-content content margin-t-4">
     <div class="card p-x shadow-sm w-100">
-        <!-- Card Header -->
-        <div class="card-header dflex align-center justify-between">
-            <div>
-                <h4 class="mb-0">Purchase Request</h4>
-                <p class="text-muted fs-7 mb-0">Manage your purchase requests</p>
-            </div>
-            <div class="dflex align-center " style="gap : 0.75rem; ">
-
-                <!-- Redirect ke halaman add -->
-                <a href="<?= getURL('purchase-request/add-page') ?>" class="btn btn-primary dflex align-center">
-                    <i class="bx bx-plus-circle margin-r-2"></i>
-                    <span class="fw-normal fs-7">Add New</span>
-                </a>
-                <!-- Tombol Export Excel -->
-                <button id="btn-export" class="btn btn-success dflex align-center">
-                    <i class="bx bx-download margin-r-2"></i>
-                    <span class="fw-normal fs-7">Export</span>
-                </button>
-            </div>
-        </div>
-
-
-        <!-- Card Body -->
-        <div class="card mt-4 shadow-sm w-100 gap">
-            <div class="card-body">
-                <div class="table-responsive margin-t-14p">
-                    <table class="table table-bordered table-master fs-7 w-100">
-                        <thead>
-                            <tr>
-                                <td class="tableheader">No</td>
-                                <td class="tableheader">PR Number</td>
-                                <td class="tableheader">Request Date</td>
-                                <td class="tableheader">Supplier</td>
-                                <td class="tableheader">Description</td>
-                                <td class="tableheader">Actions</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?= $this->include('template/v_footer') ?>
-
-<!-- Modal Export Progress -->
-<div class="modal fade" id="exportModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bx bx-download"></i> Export Excel
-                </h5>
-            </div>
-            <div class="modal-body">
-                <div style="text-align: center; padding: 20px 0;">
-                    <i class="bx bx-loader-alt bx-spin" style="font-size: 48px; color: #28a745;" id="export-icon"></i>
-                    <h6 id="export-status" style="margin-top: 20px; font-weight: 500;">Memulai export...</h6>
-                    <p id="export-detail" style="color: #6c757d; font-size: 14px; margin-top: 5px;">0 records</p>
-
-                    <div style="margin: 20px 0;">
-                        <div style="background: #e9ecef; border-radius: 10px; overflow: hidden; height: 10px;">
-                            <div id="export-progress"
-                                style="background: #28a745; height: 100%; width: 0%; transition: width 0.3s;"></div>
-                        </div>
-                        <small id="export-percentage"
-                            style="color: #6c757d; font-size: 12px; margin-top: 5px; display: block;">0%</small>
+        <div class="card-header">
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Start Date</label>
+                        <input type="date" id="filter_start_date" class="form-control form-control-sm">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>End Date</label>
+                        <input type="date" id="filter_end_date" class="form-control form-control-sm">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Supplier</label>
+                        <select id="filter_supplier" class="form-control form-control-sm" style="width: 100%;">
+                            <option value="">All Suppliers</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button id="btn-filter" class="btn btn-primary btn-sm">
+                            <i class="bx bx-filter-alt"></i>
+                            <span>Filter</span>
+                        </button>
+                        <button id="btn-reset-filter" class="btn btn-secondary btn-sm">
+                            <i class="bx bx-revision"></i>
+                            <span>Reset</span>
+                        </button>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" id="btn-cancel-export">
-                    <i class="bx bx-x"></i> Cancel
+            
+            <!-- Action Buttons -->
+            <div class="header-actions">
+                <a href="<?= getURL('purchase-request/add-page') ?>" class="btn btn-primary">
+                    <i class="bx bx-plus-circle"></i>
+                    <span>Add New</span>
+                </a>
+                <button id="btn-export" class="btn btn-success">
+                    <i class="bx bx-download"></i>
+                    <span>Export</span>
                 </button>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive margin-t-14p">
+                <table class="table table-bordered table-master fs-7 w-100">
+                    <thead>
+                        <tr>
+                            <td class="tableheader" style="width: 5%">No</td>
+                            <td class="tableheader" style="width: 15%">PR Number</td>
+                            <td class="tableheader" style="width: 15%">Request Date</td>
+                            <td class="tableheader" style="width: 20%">Supplier</td>
+                            <td class="tableheader" style="width: 30%">Description</td>
+                            <td class="tableheader" style="width: 15%">Actions</td>
+                        </tr>
+                    </thead>
+                </table>
             </div>
         </div>
     </div>
 </div>
-<!--  AKHIR TAMBAHAN Modal -->
+
+<div id="export-toast" style="display: none;"></div>
+
+<?= $this->include('template/v_footer') ?>
 
 <script>
     var tbl;
 
     $(document).ready(function () {
-        console.log('PR - delete-detail binding ready');
-        $(document).on('click', '.btn-delete-detail', function (e) {
-            console.log('PR delete-detail clicked', $(this).data('id'));
+        // Initialize Supplier Filter Select2
+        $('#filter_supplier').select2({
+            placeholder: 'All Suppliers',
+            allowClear: true,
+            width: '100%',
+            ajax: {
+                url: '<?= getURL('purchase-request/search-supplier') ?>',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { term: params.term || '' };
+                },
+                processResults: function (data) {
+                    return { results: data };
+                },
+                cache: true
+            }
         });
+
+        // Initialize DataTable
+        initDataTable();
+
+        // Filter Button Click
+        $('#btn-filter').on('click', function() {
+            console.log('Filter clicked');
+            tbl.ajax.reload();
+        });
+
+        // Reset Filter Button Click
+        $('#btn-reset-filter').on('click', function() {
+            console.log('Reset filter clicked');
+            $('#filter_start_date').val('');
+            $('#filter_end_date').val('');
+            $('#filter_supplier').val(null).trigger('change');
+            tbl.ajax.reload();
+        });
+    });
+
+    function initDataTable() {
         if ($.fn.DataTable.isDataTable('.table-master')) {
             $('.table-master').DataTable().destroy();
         }
@@ -139,20 +344,30 @@
                 type: 'POST',
                 data: function (d) {
                     d.<?= csrf_token() ?> = $('meta[name="csrf-token"]').attr('content') || $('input[name="<?= csrf_token() ?>"]').val();
+                    
+                    // Tambahkan filter parameters
+                    d.filter_start_date = $('#filter_start_date').val();
+                    d.filter_end_date = $('#filter_end_date').val();
+                    d.filter_supplier = $('#filter_supplier').val();
+                    
+                    console.log('Filter params:', {
+                        start: d.filter_start_date,
+                        end: d.filter_end_date,
+                        supplier: d.filter_supplier
+                    });
                 },
                 error: function (xhr, status, error) {
                     console.error('AJAX Error:', status, error);
-                    console.error('Response:', xhr.responseText);
                     alert('Terjadi kesalahan saat memuat data');
                 }
             },
             columns: [
-                { data: 0, orderable: false, searchable: false },
+                { data: 0, orderable: false, searchable: false, className: 'text-center' },
                 { data: 1, orderable: true },
                 { data: 2, orderable: true },
                 { data: 3, orderable: true },
                 { data: 4, orderable: true },
-                { data: 5, orderable: false, searchable: false }
+                { data: 5, orderable: false, searchable: false, className: 'text-center' }
             ],
             order: [[1, 'desc']],
             pageLength: 10,
@@ -163,114 +378,173 @@
                 zeroRecords: 'Data tidak ditemukan'
             }
         });
-    });
+    }
 
-    //  Export Excel dengan Modal Progress + Cancel (Chunk 500)
+    // EXPORT DENGAN FILTER
     let isExporting = false;
     let currentXHR = null;
+    let safetyTimeout = null;
+    let pendingTimeouts = [];
 
     $('#btn-export').on('click', function () {
-        if (isExporting) {
-            alert('Export sedang berjalan, mohon tunggu...');
-            return;
-        }
+        if (isExporting) return;
 
         isExporting = true;
+        const $btn = $(this);
+        const originalHtml = $btn.html();
 
-        // Tampilkan modal
-        const modal = new bootstrap.Modal(document.getElementById('exportModal'));
-        modal.show();
+        $btn.prop('disabled', true).html('<i class="bx bx-loader-alt bx-spin"></i> <span>Exporting...</span>');
 
-        //  Set chunk size ke 500 (atau ambil dari dropdown kalau ada)
-        let limit = parseInt($('#chunk-size').val()) || 500;
+        let limit = 500;
         let allData = [];
         let offset = 0;
         let totalFetched = 0;
         let isCancelled = false;
-        let downloadLink = null;
 
-        function resetExport() {
-            isExporting = false;
-            isCancelled = false;
-            modal.hide();
-            allData = [];
-            currentXHR = null;
-            downloadLink = null;
+        // Ambil nilai filter
+        const filterStartDate = $('#filter_start_date').val();
+        const filterEndDate = $('#filter_end_date').val();
+        const filterSupplier = $('#filter_supplier').val();
 
-            // Reset UI
-            $('#export-icon').removeClass('bx-check-circle bx-x-circle').addClass('bx-loader-alt bx-spin').css('color', '#28a745');
-            $('#export-status').text('Memulai export...');
-            $('#export-detail').text('0 records');
-            $('#export-progress').css('background', '#28a745').css('width', '0%');
-            $('#export-percentage').text('0%');
-            $('#btn-cancel-export').prop('disabled', false).html('<i class="bx bx-x"></i> Cancel');
+        console.log('Export with filters:', { filterStartDate, filterEndDate, filterSupplier });
+
+        const toastHtml = `
+            <div class="export-toast">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i id="toast-icon" class="bx bx-download" style="font-size: 20px; color: #17a2b8;"></i>
+                        <div>
+                            <div id="toast-title" style="font-weight: 600; font-size: 13px; color: #212529;">Export Excel</div>
+                            <div id="toast-status" style="font-size: 12px; color: #6c757d; margin-top: 2px;">Preparing...</div>
+                        </div>
+                    </div>
+                    <button id="toast-close" type="button" style="background: none; border: none; color: #6c757d; cursor: pointer; padding: 0; font-size: 18px; line-height: 1;">
+                        <i class="bx bx-x"></i>
+                    </button>
+                </div>
+                <div class="toast-progress">
+                    <div id="toast-bar" class="toast-progress-bar"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 6px;">
+                    <small id="toast-info" style="font-size: 11px; color: #6c757d;">Starting export...</small>
+                    <small id="toast-percent" style="font-size: 11px; color: #17a2b8; font-weight: 600;">0%</small>
+                </div>
+            </div>
+        `;
+
+        $('#export-toast').html(toastHtml).show();
+
+        safetyTimeout = setTimeout(function() {
+            console.log(' SAFETY TIMEOUT TRIGGERED');
+            isCancelled = true;
+            
+            if (currentXHR) {
+                currentXHR.abort();
+                currentXHR = null;
+            }
+            
+            $('#toast-icon').removeClass('bx-download').addClass('bx-info-circle').css('color', '#ffc107');
+            $('#toast-title').text('Auto Closed');
+            $('#toast-status').text('Export completed (forced)');
+            $('#toast-bar').css('background', '#ffc107').css('width', '100%');
+            
+            const t = setTimeout(reset, 1500);
+            pendingTimeouts.push(t);
+        }, 10000);
+
+        function update(percent, status, info) {
+            if (isCancelled) return;
+            $('#toast-bar').css('width', percent + '%');
+            $('#toast-percent').text(percent + '%');
+            $('#toast-status').text(status);
+            $('#toast-info').text(info);
         }
 
-        function cancelExport() {
-            isCancelled = true;
+        function reset() {
+            if (safetyTimeout) {
+                clearTimeout(safetyTimeout);
+                safetyTimeout = null;
+            }
+
+            pendingTimeouts.forEach(t => clearTimeout(t));
+            pendingTimeouts = [];
 
             if (currentXHR) {
                 currentXHR.abort();
                 currentXHR = null;
             }
 
-            if (downloadLink) {
-                document.body.removeChild(downloadLink);
-                downloadLink = null;
-            }
+            $(document).off('click', '#toast-close');
 
-            $('#export-icon').removeClass('bx-loader-alt bx-spin').addClass('bx-x-circle').css('color', '#dc3545');
-            $('#export-status').text('Export dibatalkan');
-            $('#export-detail').text('Proses dibatalkan oleh user');
-            $('#export-progress').css('background', '#dc3545').css('width', '100%');
-            $('#btn-cancel-export').prop('disabled', true);
-
+            isExporting = false;
+            isCancelled = true;
+            
+            $('.export-toast').addClass('closing');
             setTimeout(() => {
-                resetExport();
-            }, 1500);
+                $('#export-toast').hide().html('');
+            }, 300);
+            
+            $btn.prop('disabled', false).html(originalHtml);
+            allData = [];
         }
 
-        // Event click untuk cancel
-        $('#btn-cancel-export').off('click').on('click', function () {
-                cancelExport();
-        });
-
-        function updateProgress(current, total, status, detail) {
-            if (isCancelled) return;
-
-            const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
-            $('#export-status').text(status);
-            $('#export-detail').text(detail);
-            $('#export-progress').css('width', percentage + '%');
-            $('#export-percentage').text(percentage + '%');
-        }
-
-        function getChunk() {
-            if (isCancelled) {
-                resetExport();
-                return;
+        function cancel() {
+            isCancelled = true;
+            
+            if (safetyTimeout) {
+                clearTimeout(safetyTimeout);
+                safetyTimeout = null;
             }
 
+            pendingTimeouts.forEach(t => clearTimeout(t));
+            pendingTimeouts = [];
+            
             if (currentXHR) {
                 currentXHR.abort();
+                currentXHR = null;
             }
+            
+            $('#toast-icon').removeClass('bx-download').addClass('bx-x-circle').css('color', '#dc3545');
+            $('#toast-title').text('Cancelled');
+            $('#toast-status').text('Export cancelled');
+            $('#toast-bar').css('background', '#dc3545').css('width', '100%');
+            
+            const t = setTimeout(reset, 1500);
+            pendingTimeouts.push(t);
+        }
+
+        $(document).off('click', '#toast-close').on('click', '#toast-close', function() {
+            if (!isCancelled) {
+                cancel();
+            }
+        });
+
+        function fetch() {
+            if (isCancelled) return;
+
+            if (currentXHR) currentXHR.abort();
 
             currentXHR = $.ajax({
                 url: '<?= site_url('purchase-request/get_chunk') ?>',
                 type: 'GET',
-                data: { limit: limit, offset: offset },
+                data: { 
+                    limit: limit, 
+                    offset: offset,
+                    filter_start_date: filterStartDate,
+                    filter_end_date: filterEndDate,
+                    filter_supplier: filterSupplier
+                },
                 dataType: 'json',
                 timeout: 30000,
                 success: function (res) {
-                    if (isCancelled) {
-                        resetExport();
-                        return;
-                    }
+                    if (isCancelled) return;
 
                     currentXHR = null;
 
                     if (res.error) {
-                        throw new Error(res.error);
+                        alert('Error: ' + res.error);
+                        reset();
+                        return;
                     }
 
                     if (res.data && res.data.length > 0) {
@@ -278,65 +552,38 @@
                         totalFetched += res.data.length;
                         offset += limit;
 
-                        const fetchProgress = Math.min((totalFetched / (totalFetched + limit)) * 30, 30);
-                        updateProgress(
-                            fetchProgress,
-                            100,
-                            'Mengambil data dari database...',
-                            totalFetched + ' records terkumpul'
-                        );
+                        const p = Math.min(Math.floor((totalFetched / (totalFetched + limit)) * 40), 40);
+                        update(p, 'Fetching data...', totalFetched + ' records collected');
 
-                        setTimeout(getChunk, 100);
+                        const t = setTimeout(fetch, 100);
+                        pendingTimeouts.push(t);
                     } else {
-                        updateProgress(30, 100, 'Data terkumpul!', totalFetched + ' records. Membuat file Excel...');
-                        setTimeout(exportToExcel, 500);
+                        update(40, 'Processing...', totalFetched + ' records ready');
+                        const t = setTimeout(generate, 200);
+                        pendingTimeouts.push(t);
                     }
                 },
-                error: function (xhr, status, error) {
+                error: function (xhr, status) {
                     currentXHR = null;
-
-                    if (status === 'abort' || isCancelled) {
-                        return;
-                    }
-
-                    let errorMsg = 'Gagal mengambil data';
-                    if (status === 'timeout') {
-                        errorMsg = 'Request timeout';
-                    } else if (xhr.status === 500) {
-                        errorMsg = 'Server error';
-                    }
-
-                    $('#export-icon').removeClass('bx-loader-alt bx-spin').addClass('bx-x-circle').css('color', '#dc3545');
-                    $('#export-status').text('Error!');
-                    $('#export-detail').text(errorMsg);
-                    $('#export-progress').css('background', '#dc3545').css('width', '100%');
-                    $('#btn-cancel-export').prop('disabled', true);
-
-                    setTimeout(() => {
-                        alert(errorMsg);
-                        resetExport();
-                    }, 2000);
+                    if (status === 'abort' || isCancelled) return;
+                    alert('Failed to fetch data');
+                    reset();
                 }
             });
         }
 
-        function exportToExcel() {
-            if (isCancelled) {
-                resetExport();
-                return;
-            }
+        function generate() {
+            if (isCancelled) return;
 
             if (allData.length === 0) {
-                alert('Tidak ada data untuk di-export');
-                resetExport();
+                alert('No data to export');
+                reset();
                 return;
             }
 
-            updateProgress(40, 100, 'Membuat file Excel...', allData.length + ' records');
+            update(50, 'Creating file...', 'Generating Excel...');
 
-            if (currentXHR) {
-                currentXHR.abort();
-            }
+            if (currentXHR) currentXHR.abort();
 
             currentXHR = $.ajax({
                 url: '<?= site_url('purchase-request/export-excel-all') ?>',
@@ -344,28 +591,12 @@
                 data: JSON.stringify({ data: allData }),
                 contentType: 'application/json',
                 timeout: 120000,
-                xhrFields: {
-                    responseType: 'blob'
-                },
-                xhr: function () {
-                    const xhr = new window.XMLHttpRequest();
-                    xhr.addEventListener("progress", function (evt) {
-                        if (evt.lengthComputable && !isCancelled) {
-                            const percentComplete = evt.loaded / evt.total;
-                            const progress = 40 + (percentComplete * 50);
-                            updateProgress(progress, 100, 'Membuat file Excel...',
-                                Math.round(percentComplete * 100) + '% selesai');
-                        }
-                    }, false);
-                    return xhr;
-                },
+                xhrFields: { responseType: 'blob' },
                 success: function (blob, status, xhr) {
-                    if (isCancelled) {
-                        resetExport();
-                        return;
-                    }
+                    if (isCancelled) return;
 
                     currentXHR = null;
+                    update(90, 'Almost done...', 'Preparing download');
 
                     const disposition = xhr.getResponseHeader('Content-Disposition');
                     let filename = 'All_PR_<?= date("Ymd_His") ?>.xlsx';
@@ -378,93 +609,76 @@
                         }
                     }
 
-                    updateProgress(95, 100, 'Mempersiapkan download...', filename);
-
-                    if (isCancelled) {
-                        resetExport();
-                        return;
-                    }
-
                     const url = window.URL.createObjectURL(blob);
-                    downloadLink = document.createElement('a');
-                    downloadLink.href = url;
-                    downloadLink.download = filename;
-                    document.body.appendChild(downloadLink);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
 
-                    updateProgress(98, 100, 'Mengunduh file...', filename);
+                    const t = setTimeout(function() {
+                        if (isCancelled) return;
 
-                    setTimeout(() => {
-                        if (isCancelled) {
-                            document.body.removeChild(downloadLink);
-                            window.URL.revokeObjectURL(url);
-                            resetExport();
-                            return;
-                        }
-
-                        downloadLink.click();
-
-                        updateProgress(100, 100, 'Download dimulai!', filename);
-
-                        setTimeout(() => {
-                            if (downloadLink && document.body.contains(downloadLink)) {
-                                document.body.removeChild(downloadLink);
+                        update(100, 'Complete!', allData.length + ' records exported');
+                        $('#toast-icon').removeClass('bx-download').addClass('bx-check-circle').css('color', '#28a745');
+                        $('#toast-bar').css('background', '#28a745');
+                        
+                        $(document).off('click', '#toast-close').on('click', '#toast-close', function() {
+                            if (document.body.contains(link)) {
+                                document.body.removeChild(link);
                             }
                             window.URL.revokeObjectURL(url);
-                            downloadLink = null;
+                            reset();
+                        });
 
-                            if (!isCancelled) {
-                                $('#export-icon').removeClass('bx-loader-alt bx-spin').addClass('bx-check-circle').css('color', '#28a745');
-                                $('#export-status').text('Berhasil!');
-                                $('#export-detail').text(allData.length + ' records berhasil di-export');
-                                $('#btn-cancel-export').prop('disabled', true);
-
-                                setTimeout(() => {
-                                    resetExport();
-                                }, 2000);
+                        const autoClose = setTimeout(function() {
+                            if (isExporting && !isCancelled) {
+                                if (document.body.contains(link)) {
+                                    document.body.removeChild(link);
+                                }
+                                window.URL.revokeObjectURL(url);
+                                reset();
                             }
-                        }, 1000);
-                    }, 500);
+                        }, 3000);
+                        pendingTimeouts.push(autoClose);
+                    }, 150);
+                    pendingTimeouts.push(t);
                 },
-                error: function (xhr, status, error) {
+                error: function (xhr, status) {
                     currentXHR = null;
+                    if (status === 'abort' || isCancelled) return;
 
-                    if (status === 'abort' || isCancelled) {
-                        return;
-                    }
-
-                    let errorMsg = 'Gagal export Excel';
-                    if (status === 'timeout') {
-                        errorMsg = 'Export timeout (' + allData.length + ' records)';
-                    } else if (xhr.status === 500) {
-                        errorMsg = 'Server error saat membuat Excel';
-                    }
-
-                    $('#export-icon').removeClass('bx-loader-alt bx-spin').addClass('bx-x-circle').css('color', '#dc3545');
-                    $('#export-status').text('Error!');
-                    $('#export-detail').text(errorMsg);
-                    $('#export-progress').css('background', '#dc3545').css('width', '100%');
-                    $('#btn-cancel-export').prop('disabled', true);
-
-                    setTimeout(() => {
-                        alert(errorMsg);
-                        resetExport();
-                    }, 2000);
+                    $('#toast-icon').removeClass('bx-download').addClass('bx-error-circle').css('color', '#dc3545');
+                    $('#toast-title').text('Failed');
+                    $('#toast-status').text('Export error');
+                    $('#toast-bar').css('background', '#dc3545');
+                    
+                    const t = setTimeout(function() {
+                        alert('Export failed');
+                        reset();
+                    }, 1000);
+                    pendingTimeouts.push(t);
                 }
             });
         }
 
-        // Mulai proses
-        getChunk();
+        fetch();
     });
 
-    // Cancel export ketika user leave page
     $(window).on('beforeunload', function () {
         if (isExporting && currentXHR) {
             currentXHR.abort();
-            return 'Export sedang berjalan. Yakin ingin meninggalkan halaman?';
+            
+            if (safetyTimeout) {
+                clearTimeout(safetyTimeout);
+                safetyTimeout = null;
+            }
+
+            pendingTimeouts.forEach(t => clearTimeout(t));
+            pendingTimeouts = [];
+            
+            return 'Export running';
         }
     });
-
-
-
 </script>

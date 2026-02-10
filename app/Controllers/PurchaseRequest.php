@@ -39,77 +39,161 @@ class PurchaseRequest extends BaseController
     /**
      * Get datatable data - SERVER SIDE
      */
+    /**
+     * Get datatable data - SERVER SIDE dengan FILTER
+     */
+    /**
+     * Get datatable data - SERVER SIDE dengan FILTER (Simple Version)
+     */
+    /**
+     * Get datatable data - SERVER SIDE dengan FILTER
+     */
+    /**
+     * Get datatable data - SERVER SIDE dengan FILTER (Simple & Stable Version)
+     */
     public function datatable()
     {
-        log_message('info', '=== PURCHASE REQUEST DATATABLE CALLED ===');
-
-        $csrfToken = $this->request->getPost(csrf_token());
-        log_message('info', 'CSRF Token: ' . ($csrfToken ? 'Received' : 'Missing'));
-
         try {
-            $table = Datatables::method([MPurchaseRequestHd::class, 'datatable'], 'searchable')->make();
+            // Ambil parameters dari DataTables
+            $draw = $this->request->getPost('draw') ?? 1;
+            $start = $this->request->getPost('start') ?? 0;
+            $length = $this->request->getPost('length') ?? 10;
+            $searchValue = $this->request->getPost('search')['value'] ?? '';
 
-            $table->updateRow(function ($db, $no) {
+            // Ambil filter dari form
+            $filterStartDate = $this->request->getPost('filter_start_date');
+            $filterEndDate = $this->request->getPost('filter_end_date');
+            $filterSupplier = $this->request->getPost('filter_supplier');
+
+            log_message('info', 'Datatable Filters - Start: ' . $filterStartDate . ', End: ' . $filterEndDate . ', Supplier: ' . $filterSupplier);
+
+            // Base query untuk count
+            $builderCount = $this->db->table('trpurchaserequesthd as pr')
+                ->select('pr.id')
+                ->where('pr.isactive', true);
+
+            // Apply filters untuk count
+            if (!empty($filterStartDate)) {
+                $builderCount->where('pr.transdate >=', $filterStartDate);
+            }
+            if (!empty($filterEndDate)) {
+                $builderCount->where('pr.transdate <=', $filterEndDate);
+            }
+            if (!empty($filterSupplier)) {
+                $builderCount->where('pr.supplierid', $filterSupplier);
+            }
+
+            // Total records setelah filter
+            $totalRecords = $builderCount->countAllResults();
+
+            // Base query untuk data
+            $builder = $this->db->table('trpurchaserequesthd as pr')
+                ->select('pr.*, ms.suppliername')
+                ->join('mssupplier as ms', 'pr.supplierid = ms.id', 'left')
+                ->where('pr.isactive', true);
+
+            // Apply filters
+            if (!empty($filterStartDate)) {
+                $builder->where('pr.transdate >=', $filterStartDate);
+            }
+            if (!empty($filterEndDate)) {
+                $builder->where('pr.transdate <=', $filterEndDate);
+            }
+            if (!empty($filterSupplier)) {
+                $builder->where('pr.supplierid', $filterSupplier);
+            }
+
+            // Search functionality
+            if (!empty($searchValue)) {
+                $builder->groupStart()
+                    ->like('pr.transcode', $searchValue)
+                    ->orLike('ms.suppliername', $searchValue)
+                    ->orLike('pr.description', $searchValue)
+                    ->groupEnd();
+            }
+
+            // Get data with pagination
+            $data = $builder->orderBy('pr.transdate', 'DESC')
+                ->orderBy('pr.id', 'DESC')
+                ->limit($length, $start)
+                ->get()
+                ->getResultArray();
+
+            // Format data
+            $bulanIndo = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember'
+            ];
+
+            $formattedData = [];
+            $no = $start + 1;
+
+            foreach ($data as $row) {
+                // Format tanggal
+                $timestamp = strtotime($row['transdate']);
+                $tanggalFormat = date('d', $timestamp) . ' ' .
+                    $bulanIndo[(int) date('n', $timestamp)] . ' ' .
+                    date('Y', $timestamp);
+
                 // Tombol Edit
-                $btn_edit = "<a href='" . getURL('purchase-request/edit-page/' . encrypting($db->id)) . "' 
-                   class='btn btn-sm btn-warning' title='Edit'>
-                   <i class='bx bx-edit-alt'></i>
-                </a>";
+                $btn_edit = "<a href='" . getURL('purchase-request/edit-page/' . encrypting($row['id'])) . "' 
+               class='btn btn-sm btn-warning' title='Edit'>
+               <i class='bx bx-edit-alt'></i>
+            </a>";
 
                 // Tombol Delete
                 $btn_hapus = "<button type='button' class='btn btn-sm btn-danger' title='Delete'
-                    onclick=\"modalDelete('Delete Purchase Request - " . $db->transcode . "', {
-                        'link':'" . getURL('purchase-request/delete') . "', 
-                        'id':'" . encrypting($db->id) . "', 
-                        'pagetype':'table'
-                    })\">
-                    <i class='bx bx-trash'></i>
-                  </button>";
+                onclick=\"modalDelete('Delete Purchase Request - " . htmlspecialchars($row['transcode']) . "', {
+                    'link':'" . getURL('purchase-request/delete') . "', 
+                    'id':'" . encrypting($row['id']) . "', 
+                    'pagetype':'table'
+                })\">
+                <i class='bx bx-trash'></i>
+              </button>";
 
-                // Tombol Print PDF (BARU)
-                $btn_print = "<a href='" . getURL('purchase-request/print-pdf/' . encrypting($db->id)) . "' 
-                    class='btn btn-sm btn-info' title='Print PDF' target='_blank'>
-                    <i class='bx bx-printer'></i>
-                 </a>";
+                // Tombol Print PDF
+                $btn_print = "<a href='" . getURL('purchase-request/print-pdf/' . encrypting($row['id'])) . "' 
+                class='btn btn-sm btn-info' title='Print PDF' target='_blank'>
+                <i class='bx bx-printer'></i>
+             </a>";
 
-
-                // Format tanggal
-                $bulanIndo = [
-                    1 => 'Januari',
-                    2 => 'Februari',
-                    3 => 'Maret',
-                    4 => 'April',
-                    5 => 'Mei',
-                    6 => 'Juni',
-                    7 => 'Juli',
-                    8 => 'Agustus',
-                    9 => 'September',
-                    10 => 'Oktober',
-                    11 => 'November',
-                    12 => 'Desember'
-                ];
-                $timestamp = strtotime($db->transdate);
-                $tanggalFormat = date('d', $timestamp) . ' ' . $bulanIndo[(int) date('n', $timestamp)] . ' ' . date('Y', $timestamp);
-
-                return [
-                    $no,
-                    $db->transcode,
+                $formattedData[] = [
+                    $no++,
+                    htmlspecialchars($row['transcode']),
                     $tanggalFormat,
-                    $db->suppliername ?? '-',
-                    $db->description ?? '-',
+                    htmlspecialchars($row['suppliername'] ?? '-'),
+                    htmlspecialchars($row['description'] ?? '-'),
                     "<div class='action-buttons'>{$btn_edit} {$btn_hapus} {$btn_print}</div>"
                 ];
-            });
+            }
 
-            log_message('info', '=== DATATABLE RESPONSE SENT ===');
-            return $table->toJson();
+            $response = [
+                'draw' => intval($draw),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $totalRecords,
+                'data' => $formattedData
+            ];
+
+            log_message('info', 'Datatable response - Total: ' . $totalRecords . ', Returned: ' . count($formattedData));
+
+            return $this->response->setJSON($response);
 
         } catch (\Exception $e) {
             log_message('error', 'Datatable Error: ' . $e->getMessage());
             log_message('error', 'Trace: ' . $e->getTraceAsString());
 
             return $this->response->setJSON([
-                'draw' => (int) ($this->request->getPost('draw') ?? 1),
+                'draw' => intval($this->request->getPost('draw') ?? 1),
                 'recordsTotal' => 0,
                 'recordsFiltered' => 0,
                 'data' => [],
@@ -117,7 +201,6 @@ class PurchaseRequest extends BaseController
             ]);
         }
     }
-
     /**
      * Show form for add/edit Purchase Request
      */
@@ -811,19 +894,13 @@ class PurchaseRequest extends BaseController
      */
     public function exportExcelAll()
     {
-        // Close session agar tidak blocking request lain
         session_write_close();
-
-        // Set time limit dan memory limit
-        set_time_limit(300); // 5 menit
-        ini_set('memory_limit', '512M'); // Adjust sesuai kebutuhan
+        set_time_limit(300);
+        ini_set('memory_limit', '512M');
 
         try {
-            // Ambil raw input karena dikirim sebagai JSON
             $rawInput = $this->request->getBody();
             $jsonData = json_decode($rawInput, true);
-
-            // Ekstrak data dari JSON
             $data = $jsonData['data'] ?? [];
 
             if (empty($data)) {
@@ -833,11 +910,8 @@ class PurchaseRequest extends BaseController
                 ]);
             }
 
-            //  Log jumlah data
             log_message('info', 'Export Excel - Total data: ' . count($data));
 
-
-            // Buat Spreadsheet
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
 
@@ -858,13 +932,16 @@ class PurchaseRequest extends BaseController
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()->setARGB('FFD9D9D9');
 
-            // Isi data dari frontend
+            // Isi data
             $rowExcel = 4;
             $no = 1;
             foreach ($data as $header) {
                 $sheet->setCellValue('A' . $rowExcel, $no++);
                 $sheet->setCellValue('B' . $rowExcel, $header['transcode']);
-                $sheet->setCellValue('C' . $rowExcel, $this->formatDateIndo($header['transdate']));
+
+                // FORMAT TANGGAL Y-m-d (2025-01-15)
+                $sheet->setCellValue('C' . $rowExcel, $header['transdate']);
+
                 $sheet->setCellValue('D' . $rowExcel, $header['suppliername'] ?? '-');
                 $sheet->setCellValue('E' . $rowExcel, $header['description'] ?? '-');
                 $rowExcel++;
@@ -886,25 +963,20 @@ class PurchaseRequest extends BaseController
                 $sheet->getColumnDimension($col)->setAutoSize(true);
             }
 
-            // Clear output buffer sebelum download
             if (ob_get_level()) {
                 ob_end_clean();
             }
 
-            // Generate filename
             $filename = 'All_PR_' . date('Ymd_His') . '.xlsx';
 
-            //  Set headers yang benar untuk download    Excel
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $filename . '"');
             header('Cache-Control: max-age=0');
-            header('Cache-Control: max-age=1');
             header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
             header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
             header('Cache-Control: cache, must-revalidate');
             header('Pragma: public');
 
-            // Output Excel
             $writer = new Xlsx($spreadsheet);
             $writer->save('php://output');
             exit;
@@ -917,20 +989,23 @@ class PurchaseRequest extends BaseController
             ]);
         }
     }
-
     /**
      * Get data dengan chunk untuk export
      */
     public function get_chunk()
     {
-        // Close session agar tidak blocking request lain
         session_write_close();
 
         try {
             $limit = $this->request->getGet('limit') ?? 1000;
             $offset = $this->request->getGet('offset') ?? 0;
 
-            $results = $this->mHeader->getChunk($limit, $offset);
+            // Ambil filter dari GET
+            $filterStartDate = $this->request->getGet('filter_start_date');
+            $filterEndDate = $this->request->getGet('filter_end_date');
+            $filterSupplier = $this->request->getGet('filter_supplier');
+
+            $results = $this->mHeader->getChunk($limit, $offset, $filterStartDate, $filterEndDate, $filterSupplier);
 
             return $this->response->setJSON([
                 'data' => $results,

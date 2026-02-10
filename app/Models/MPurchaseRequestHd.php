@@ -80,7 +80,7 @@ class MPurchaseRequestHd extends Model
             case 'id':
                 $builder->where('pr.id', $filter);
                 $result = $builder->get()->getRowArray();
-                
+
                 // Jika withDetails = true, ambil juga detail
                 if ($withDetails && !empty($result)) {
                     $result['details'] = $this->db->table('trpurchaserequestdt as prd')
@@ -224,16 +224,30 @@ class MPurchaseRequestHd extends Model
         return $this->db->table('trpurchaserequesthd')->delete([$column => $value]);
     }
 
-    public function getChunk($limit, $offset)
-{
-    return $this->db->table('trpurchaserequesthd as pr')
-        ->select('pr.transcode, pr.transdate, ms.suppliername, pr.description')
-        ->join('mssupplier as ms', 'pr.supplierid = ms.id', 'left')
-        ->where('pr.isactive', true)
-        ->orderBy('pr.id', 'ASC')
-        ->limit($limit, $offset)
-        ->get()
-        ->getResultArray();
-}
+    // File: MPurchaseRequestHd.php
+
+    public function getChunk($limit, $offset, $filterStartDate = null, $filterEndDate = null, $filterSupplier = null)
+    {
+        $builder = $this->db->table('trpurchaserequesthd as pr')
+            ->select('pr.transcode, pr.transdate, ms.suppliername, pr.description')
+            ->join('mssupplier as ms', 'pr.supplierid = ms.id', 'left')
+            ->where('pr.isactive', true);
+
+        // Apply filters
+        if (!empty($filterStartDate)) {
+            $builder->where('pr.transdate >=', $filterStartDate);
+        }
+        if (!empty($filterEndDate)) {
+            $builder->where('pr.transdate <=', $filterEndDate);
+        }
+        if (!empty($filterSupplier)) {
+            $builder->where('pr.supplierid', $filterSupplier);
+        }
+
+        return $builder->orderBy('pr.id', 'ASC')
+            ->limit($limit, $offset)
+            ->get()
+            ->getResultArray();
+    }
 
 }
