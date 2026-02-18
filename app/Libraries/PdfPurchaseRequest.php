@@ -16,7 +16,7 @@ class PdfPurchaseRequest extends Fpdf
     // Page header
     function Header()
     {
-        $logoPath = FCPATH . 'public/images/pdf-logo/serenity-local.png';
+        $logoPath = FCPATH . 'public/images/pdf-logo/Hindia.jpg';
         $ttdPath = FCPATH . 'public/images/pdf-logo/TTdku.jpg';
 
         $rowHeight = 7;
@@ -28,7 +28,7 @@ class PdfPurchaseRequest extends Fpdf
         // Kolom 1. Logo
         $this->Cell(35, $totalHeight, '', 1, 0, 'C');
         if (file_exists($logoPath)) {
-            $this->Image($logoPath, $startX + 4, $startY + 8, 27);
+            $this->Image($logoPath, $startX + 0, $startY + 0, 37);
         }
 
         // Kolom 2. Judul

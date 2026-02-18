@@ -118,14 +118,16 @@ $routes->group('product', function ($routes) {
     $routes->add('importExcel', 'Product::importExcel', $this->noauth);
 });
 
+
+// Routes untuk Purchase Request
 $routes->group('purchase-request', function ($routes) {
     $routes->add('', 'PurchaseRequest::index', $this->noauth);
     $routes->add('datatable', 'PurchaseRequest::datatable', $this->noauth);
 
-    //  INI (alias untuk backward compatibility)
+    // Alias untuk backward compatibility
     $routes->add('table', 'PurchaseRequest::datatable', $this->noauth);
 
-    //  NEW: Halaman add/edit (bukan modal)
+    // NEW: Halaman add/edit (bukan modal)
     $routes->add('add-page', 'PurchaseRequest::add_page', $this->noauth);
     $routes->add('edit-page/(:any)', 'PurchaseRequest::edit_page/$1', $this->noauth);
 
@@ -134,10 +136,12 @@ $routes->group('purchase-request', function ($routes) {
 
     // Export Excel
     $routes->get('export-excel/(:any)', 'PurchaseRequest::export_excel/$1');
-
-    //  Dari GET ke POST (atau pakai 'add' yang support semua method)
     $routes->post('export-excel-all', 'PurchaseRequest::exportExcelAll', $this->noauth);
     $routes->get('get_chunk', 'PurchaseRequest::get_chunk', $this->noauth);
+
+    // ===== IMPORT EXCEL ROUTES (NEW) =====
+    $routes->add('formImport', 'PurchaseRequest::formImport', $this->noauth);
+    $routes->add('importExcel', 'PurchaseRequest::importExcel', $this->noauth);
 
     // Modal untuk edit detail
     $routes->add('add', 'PurchaseRequest::add', $this->noauth);
@@ -150,14 +154,29 @@ $routes->group('purchase-request', function ($routes) {
     $routes->add('deletedetail', 'PurchaseRequest::deleteDetail');
     $routes->add('getdetailsajax', 'PurchaseRequest::getDetailsAjax');
 
-
     // Search endpoints
     $routes->add('search-supplier', 'PurchaseRequest::searchSupplier', $this->noauth);
     $routes->add('search-product', 'PurchaseRequest::searchProduct', $this->noauth);
     $routes->add('search-uom', 'PurchaseRequest::searchUom', $this->noauth);
 
     $routes->post('form_edit_detail/(:any)', 'PurchaseRequest::form_edit_detail/$1');
+});
 
+// Routes Master Files
+$routes->group('files', function ($routes) {
+    $routes->add('', 'Files::index', $this->noauth);
+    $routes->add('table', 'Files::datatable', $this->noauth);
+    $routes->add('datatable', 'Files::datatable', $this->noauth);
+    $routes->add('form', 'Files::form', $this->noauth);
+    $routes->add('form/(:num)', 'Files::form/$1', $this->noauth);
+    $routes->add('upload', 'Files::upload', $this->noauth);
+    $routes->add('upload_chunk', 'Files::uploadChunk', $this->noauth);
+    $routes->add('merge_chunks', 'Files::mergeChunks', $this->noauth);
+    $routes->add('store', 'Files::store', $this->noauth);
+    $routes->add('delete', 'Files::delete', $this->noauth);
+    $routes->get('download/(:num)', 'Files::download/$1', $this->noauth);
+    $routes->post('view/(:num)', 'Files::view/$1', $this->noauth);
+    $routes->add('cleanup_chunks', 'Files::cleanupChunks', $this->noauth);
 });
 //bismillah bisa ya rabb bantu hamba
 

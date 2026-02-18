@@ -281,4 +281,3 @@ class MPurchaseRequestDt extends Model
         return $builder->countAllResults() > 0;
     }
 }
-  

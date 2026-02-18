@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="<?= base_url('public/css/fixedColumns.dataTables.min.css') ?>">
 <!-- Javascript/jQuery -->
 <script src="<?= base_url('public/js/jquery.js') ?>"></script>
+<script src="<?= base_url('public/js/jquery.easing.min.js') ?>"></script>
 <script src="<?= base_url('public/js/jquery.dataTables.min.js') ?>"></script>
 <script src="<?= base_url('public/js/dataTables.fixedColumns.min.js') ?>"></script>
 <script src="<?= base_url('public/js/typeahead.min.js') ?>"></script>

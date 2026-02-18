@@ -37,19 +37,7 @@ class PurchaseRequest extends BaseController
     }
 
     /**
-     * Get datatable data - SERVER SIDE
-     */
-    /**
      * Get datatable data - SERVER SIDE dengan FILTER
-     */
-    /**
-     * Get datatable data - SERVER SIDE dengan FILTER (Simple Version)
-     */
-    /**
-     * Get datatable data - SERVER SIDE dengan FILTER
-     */
-    /**
-     * Get datatable data - SERVER SIDE dengan FILTER (Simple & Stable Version)
      */
     public function datatable()
     {
@@ -201,6 +189,7 @@ class PurchaseRequest extends BaseController
             ]);
         }
     }
+
     /**
      * Show form for add/edit Purchase Request
      */
@@ -323,7 +312,6 @@ class PurchaseRequest extends BaseController
                             'qty' => (float) $row['qty'],
                             'createdby' => getSession('userid'),
                             'createddate' => date('Y-m-d H:i:s'),
-                            // : Tambahkan updatedby dan updateddate di add detail
                             'updatedby' => getSession('userid'),
                             'updateddate' => date('Y-m-d H:i:s'),
                             'isactive' => true
@@ -586,8 +574,8 @@ class PurchaseRequest extends BaseController
                     'qty' => (float) $qty,
                     'createdby' => getSession('userid'),
                     'createddate' => date('Y-m-d H:i:s'),
-                    'updatedby' => getSession('userid'),   // TAMBAHAN
-                    'updateddate' => date('Y-m-d H:i:s'),  //  TAMBAHAN
+                    'updatedby' => getSession('userid'),
+                    'updateddate' => date('Y-m-d H:i:s'),
                     'isactive' => true
                 ];
 
@@ -739,6 +727,7 @@ class PurchaseRequest extends BaseController
 
     /**
      * Modal Form untuk Edit Detail
+     * 
      */
     public function form_edit_detail($id = '')
     {
@@ -779,8 +768,6 @@ class PurchaseRequest extends BaseController
         }
     }
 
-
-
     /**
      * Print Purchase Request to PDF
      */
@@ -816,8 +803,6 @@ class PurchaseRequest extends BaseController
             $pdf->AddPage();
             $pdf->SetFont('Arial', '', 10);
 
-
-
             $pdf->SetFont('Arial', '', 9);
             // No Purchase Request
             $pdf->Cell(45, 6, 'No. Purchase Request', 0, 0, 'L');
@@ -831,15 +816,11 @@ class PurchaseRequest extends BaseController
             $pdf->Cell(5, 6, ':', 0, 0, 'C');
             $pdf->Cell(25, 6, $this->formatDateIndo($header['transdate']), 0, 1, 'R');
 
-
             // Supplier
             $pdf->Cell(45, 6, 'Supplier', 0, 0, 'L');
             $pdf->Cell(5, 6, ':', 0, 0, 'C');
             $pdf->SetFont('Arial', '', 9);
             $pdf->Cell(45, 6, $header['suppliername'] ?? '-', 0, 1, 'L');
-
-
-
 
             $pdf->Ln(5);
 
@@ -856,7 +837,7 @@ class PurchaseRequest extends BaseController
 
             // Output PDF
             $filename = 'PR_' . $header['transcode'] . '_' . date('Ymd') . '.pdf';
-            $pdf->Output('D', $filename); // D = Download
+            $pdf->Output('I', $filename); // D = Download
             exit;
         } catch (\Exception $e) {
             log_message('error', 'Error generating PDF: ' . $e->getMessage());
@@ -891,6 +872,7 @@ class PurchaseRequest extends BaseController
     /**
      *  Export Excel dengan Chunk
      * Method ini menerima data dari frontend yang sudah di-chunk
+     * FIXED: Return JSON dengan blob base64 agar compatible dengan IDM
      */
     public function exportExcelAll()
     {
@@ -907,7 +889,7 @@ class PurchaseRequest extends BaseController
                 return $this->response->setJSON([
                     'sukses' => 0,
                     'pesan' => 'Data kosong untuk export'
-                ]);
+                ])->setContentType('application/json');
             }
 
             log_message('info', 'Export Excel - Total data: ' . count($data));
@@ -938,10 +920,7 @@ class PurchaseRequest extends BaseController
             foreach ($data as $header) {
                 $sheet->setCellValue('A' . $rowExcel, $no++);
                 $sheet->setCellValue('B' . $rowExcel, $header['transcode']);
-
-                // FORMAT TANGGAL Y-m-d (2025-01-15)
                 $sheet->setCellValue('C' . $rowExcel, $header['transdate']);
-
                 $sheet->setCellValue('D' . $rowExcel, $header['suppliername'] ?? '-');
                 $sheet->setCellValue('E' . $rowExcel, $header['description'] ?? '-');
                 $rowExcel++;
@@ -969,26 +948,31 @@ class PurchaseRequest extends BaseController
 
             $filename = 'All_PR_' . date('Ymd_His') . '.xlsx';
 
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="' . $filename . '"');
-            header('Cache-Control: max-age=0');
-            header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-            header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-            header('Cache-Control: cache, must-revalidate');
-            header('Pragma: public');
-
+            // Save to temp file then encode to base64
+            $tempFile = tempnam(sys_get_temp_dir(), 'excel_');
             $writer = new Xlsx($spreadsheet);
-            $writer->save('php://output');
-            exit;
+            $writer->save($tempFile);
+
+            $blobData = base64_encode(file_get_contents($tempFile));
+            @unlink($tempFile);
+
+            // Return JSON dengan blob base64
+            return $this->response->setJSON([
+                'sukses' => 1,
+                'filename' => $filename,
+                'blob' => $blobData,
+                'size' => strlen($blobData)
+            ])->setContentType('application/json');
 
         } catch (\Exception $e) {
             log_message('error', 'Export Excel Error: ' . $e->getMessage());
             return $this->response->setJSON([
                 'sukses' => 0,
                 'pesan' => 'Error: ' . $e->getMessage()
-            ]);
+            ])->setContentType('application/json');
         }
     }
+
     /**
      * Get data dengan chunk untuk export
      */
@@ -1019,5 +1003,136 @@ class PurchaseRequest extends BaseController
                 'error' => $e->getMessage()
             ]);
         }
+    }
+
+    // ========== IMPORT EXCEL METHODS (NEW) ==========
+
+    /**
+     * Form Import Excel - Modal
+     */
+    public function formImport()
+    {
+        $dt['view'] = view('master/purchase_request/v_import', []);
+        $dt['csrfToken'] = csrf_hash();
+        echo json_encode($dt);
+    }
+
+    /**
+     * Import Excel - Process data dari frontend
+     * FIXED: 
+     * 1. Ganti insert() ke store()
+     * 2. Tambah try-catch per baris supaya 1 baris error tidak merusak seluruh batch
+     * 3. Hapus transComplete() - di PostgreSQL menyebabkan error koneksi setelah commit
+     */
+    public function importExcel()
+    {
+        $datas = json_decode($this->request->getPost('datas'));
+        $res = array();
+
+        // FIX: Pakai transStart() bukan transBegin() untuk PostgreSQL
+        // transStart() otomatis handle commit/rollback tanpa perlu transComplete()
+        $this->db->transStart();
+
+        try {
+            $undfhpr = 0;
+            $undfhprarr = [];
+
+            foreach ($datas as $dt) {
+                try {
+                    // Validasi minimal kolom
+                    if (
+                        empty($dt[0]) || // transcode
+                        empty($dt[1]) || // transdate
+                        empty($dt[2])    // suppliername
+                    ) {
+                        $undfhpr++;
+                        $undfhprarr[] = ($dt[0] ?? '-') . ' (Kolom wajib kosong)';
+                        continue;
+                    }
+
+                    // Validasi format tanggal harus Y-m-d
+                    $transdate = trim($dt[1]);
+                    if (!$this->isValidDate($transdate)) {
+                        $undfhpr++;
+                        $undfhprarr[] = $dt[0] . ' (Format tanggal tidak valid: ' . $transdate . ')';
+                        continue;
+                    }
+
+                    // Cari Supplier by Name
+                    $supplierName = trim($dt[2]);
+                    $supplier = $this->mHeader->getSupplierByName($supplierName);
+
+                    if (empty($supplier)) {
+                        $undfhpr++;
+                        $undfhprarr[] = $dt[0] . ' (Supplier "' . $supplierName . '" tidak ditemukan)';
+                        continue;
+                    }
+
+                    // Check duplicate transcode
+                    $transcode = trim($dt[0]);
+                    if ($this->mHeader->transcodeExists($transcode)) {
+                        $undfhpr++;
+                        $undfhprarr[] = $dt[0] . ' (Transcode sudah ada)';
+                        continue;
+                    }
+
+                    // Simpan Purchase Request Header
+                    $this->mHeader->store([
+                        'transcode' => $transcode,
+                        'transdate' => $transdate,
+                        'supplierid' => $supplier['id'],
+                        'description' => isset($dt[3]) ? trim($dt[3]) : null,
+                        'createddate' => date('Y-m-d H:i:s'),
+                        'createdby' => getSession('userid'),
+                        'updateddate' => date('Y-m-d H:i:s'),
+                        'updatedby' => getSession('userid'),
+                        'isactive' => true
+                    ]);
+
+                } catch (\Exception $rowEx) {
+                    $undfhpr++;
+                    $undfhprarr[] = ($dt[0] ?? '-') . ' (Error: ' . $rowEx->getMessage() . ')';
+                    log_message('error', 'Import PR row error: ' . $rowEx->getMessage());
+                    continue;
+                }
+            }
+
+            // FIX: transComplete() dipasang di sini - SATU KALI saja
+            // Ini yang commit transaksi dan TIDAK merusak koneksi di PostgreSQL
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() === false) {
+                throw new Exception('Transaction failed');
+            }
+
+            $res = [
+                'sukses' => '1',
+                'undfhpr' => $undfhpr,
+                'undfhprarr' => $undfhprarr
+            ];
+
+        } catch (Exception $e) {
+            // Rollback jika ada exception di luar loop
+            if ($this->db->transStatus() !== false) {
+                $this->db->transRollback();
+            }
+            $res = [
+                'sukses' => '0',
+                'err' => $e->getMessage(),
+                'traceString' => $e->getTraceAsString()
+            ];
+        }
+
+        $res['csrfToken'] = csrf_hash();
+        echo json_encode($res);
+    }
+
+    /**
+     * Helper: Validate date format (Y-m-d)
+     */
+    private function isValidDate($date)
+    {
+        $d = \DateTime::createFromFormat('Y-m-d', $date);
+        return $d && $d->format('Y-m-d') === $date;
     }
 }

@@ -50,33 +50,33 @@
         margin-bottom: 1.5rem;
         border: 1px solid #e9ecef;
     }
-    
+
     .filter-row {
         display: flex;
         gap: 1rem;
         align-items: end;
         flex-wrap: wrap;
     }
-    
+
     .filter-group {
         flex: 1;
         min-width: 180px;
         display: flex;
         flex-direction: column;
     }
-    
+
     .filter-group label {
         margin-bottom: 0.375rem;
         font-size: 0.875rem;
         font-weight: 600;
         color: #495057;
     }
-    
+
     .filter-group input,
     .filter-group select {
         width: 100%;
     }
-    
+
     .filter-actions {
         display: flex;
         gap: 0.5rem;
@@ -129,11 +129,11 @@
         .filter-group {
             min-width: 100%;
         }
-        
+
         .filter-actions {
             width: 100%;
         }
-        
+
         .filter-actions .btn {
             flex: 1;
         }
@@ -161,6 +161,7 @@
             transform: translateX(400px);
             opacity: 0;
         }
+
         to {
             transform: translateX(0);
             opacity: 1;
@@ -172,6 +173,7 @@
             transform: translateX(0);
             opacity: 1;
         }
+
         to {
             transform: translateX(400px);
             opacity: 0;
@@ -186,7 +188,7 @@
         background: white;
         border-left: 4px solid #17a2b8;
         border-radius: 6px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         padding: 16px;
         z-index: 9999;
         animation: slideInRight 0.3s ease-out;
@@ -227,19 +229,19 @@
                         <label>Start Date</label>
                         <input type="date" id="filter_start_date" class="form-control form-control-sm">
                     </div>
-                    
+
                     <div class="filter-group">
                         <label>End Date</label>
                         <input type="date" id="filter_end_date" class="form-control form-control-sm">
                     </div>
-                    
+
                     <div class="filter-group">
                         <label>Supplier</label>
                         <select id="filter_supplier" class="form-control form-control-sm" style="width: 100%;">
                             <option value="">All Suppliers</option>
                         </select>
                     </div>
-                    
+
                     <div class="filter-actions">
                         <button id="btn-filter" class="btn btn-primary btn-sm">
                             <i class="bx bx-filter-alt"></i>
@@ -252,15 +254,20 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Action Buttons -->
             <div class="header-actions">
                 <a href="<?= getURL('purchase-request/add-page') ?>" class="btn btn-primary">
                     <i class="bx bx-plus-circle"></i>
                     <span>Add New</span>
                 </a>
-                <button id="btn-export" class="btn btn-success">
+                <button class="btn btn-primary"
+                    onclick="return modalForm('Import Purchase Request', 'modal-lg', '<?= getURL('purchase-request/formImport') ?>')">
                     <i class="bx bx-download"></i>
+                    <span>Import</span>
+                </button>
+                <button id="btn-export" class="btn btn-success">
+                    <i class="bx bx-upload"></i>
                     <span>Export</span>
                 </button>
             </div>
@@ -316,13 +323,13 @@
         initDataTable();
 
         // Filter Button Click
-        $('#btn-filter').on('click', function() {
+        $('#btn-filter').on('click', function () {
             console.log('Filter clicked');
             tbl.ajax.reload();
         });
 
         // Reset Filter Button Click
-        $('#btn-reset-filter').on('click', function() {
+        $('#btn-reset-filter').on('click', function () {
             console.log('Reset filter clicked');
             $('#filter_start_date').val('');
             $('#filter_end_date').val('');
@@ -344,12 +351,12 @@
                 type: 'POST',
                 data: function (d) {
                     d.<?= csrf_token() ?> = $('meta[name="csrf-token"]').attr('content') || $('input[name="<?= csrf_token() ?>"]').val();
-                    
+
                     // Tambahkan filter parameters
                     d.filter_start_date = $('#filter_start_date').val();
                     d.filter_end_date = $('#filter_end_date').val();
                     d.filter_supplier = $('#filter_supplier').val();
-                    
+
                     console.log('Filter params:', {
                         start: d.filter_start_date,
                         end: d.filter_end_date,
@@ -380,16 +387,21 @@
         });
     }
 
-    // EXPORT DENGAN FILTER
+    // ===== EXPORT WITH CANCEL & ACTIVITY TIMEOUT =====
     let isExporting = false;
-    let currentXHR = null;
-    let safetyTimeout = null;
-    let pendingTimeouts = [];
+    let exportCancelled = false;
+    let currentExportXHR = null;
+    let exportTimeouts = [];
+    let activityTimeout = null; // ← Timeout untuk detect stuck
 
     $('#btn-export').on('click', function () {
-        if (isExporting) return;
+        if (isExporting) {
+            console.log('⚠️ Export already running');
+            return;
+        }
 
         isExporting = true;
+        exportCancelled = false;
         const $btn = $(this);
         const originalHtml = $btn.html();
 
@@ -399,136 +411,188 @@
         let allData = [];
         let offset = 0;
         let totalFetched = 0;
-        let isCancelled = false;
 
-        // Ambil nilai filter
         const filterStartDate = $('#filter_start_date').val();
         const filterEndDate = $('#filter_end_date').val();
         const filterSupplier = $('#filter_supplier').val();
 
         console.log('Export with filters:', { filterStartDate, filterEndDate, filterSupplier });
 
+        // ===== TOAST UI =====
         const toastHtml = `
-            <div class="export-toast">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <i id="toast-icon" class="bx bx-download" style="font-size: 20px; color: #17a2b8;"></i>
-                        <div>
-                            <div id="toast-title" style="font-weight: 600; font-size: 13px; color: #212529;">Export Excel</div>
-                            <div id="toast-status" style="font-size: 12px; color: #6c757d; margin-top: 2px;">Preparing...</div>
-                        </div>
-                    </div>
-                    <button id="toast-close" type="button" style="background: none; border: none; color: #6c757d; cursor: pointer; padding: 0; font-size: 18px; line-height: 1;">
-                        <i class="bx bx-x"></i>
-                    </button>
-                </div>
-                <div class="toast-progress">
-                    <div id="toast-bar" class="toast-progress-bar"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 6px;">
-                    <small id="toast-info" style="font-size: 11px; color: #6c757d;">Starting export...</small>
-                    <small id="toast-percent" style="font-size: 11px; color: #17a2b8; font-weight: 600;">0%</small>
+    <div class="export-toast">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i id="toast-icon" class="bx bx-download" style="font-size: 20px; color: #17a2b8;"></i>
+                <div>
+                    <div id="toast-title" style="font-weight: 600; font-size: 13px; color: #212529;">Export Excel</div>
+                    <div id="toast-status" style="font-size: 12px; color: #6c757d; margin-top: 2px;">Preparing...</div>
                 </div>
             </div>
-        `;
+            <button id="toast-close" type="button" style="background: none; border: none; color: #6c757d; cursor: pointer; padding: 0; font-size: 18px; line-height: 1;">
+                <i class="bx bx-x"></i>
+            </button>
+        </div>
+        <div class="toast-progress">
+            <div id="toast-bar" class="toast-progress-bar"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 6px;">
+            <small id="toast-info" style="font-size: 11px; color: #6c757d;">Starting export...</small>
+            <small id="toast-percent" style="font-size: 11px; color: #17a2b8; font-weight: 600;">0%</small>
+        </div>
+    </div>
+`;
 
         $('#export-toast').html(toastHtml).show();
 
-        safetyTimeout = setTimeout(function() {
-            console.log(' SAFETY TIMEOUT TRIGGERED');
-            isCancelled = true;
-            
-            if (currentXHR) {
-                currentXHR.abort();
-                currentXHR = null;
+        // ===== START ACTIVITY TIMEOUT =====
+        resetActivityTimeout();
+
+        function resetActivityTimeout() {
+            // Clear timeout lama
+            if (activityTimeout) {
+                clearTimeout(activityTimeout);
             }
-            
-            $('#toast-icon').removeClass('bx-download').addClass('bx-info-circle').css('color', '#ffc107');
-            $('#toast-title').text('Auto Closed');
-            $('#toast-status').text('Export completed (forced)');
-            $('#toast-bar').css('background', '#ffc107').css('width', '100%');
-            
-            const t = setTimeout(reset, 1500);
-            pendingTimeouts.push(t);
-        }, 10000);
+
+            // Set timeout baru 10 detik
+            // Kalau 10 detik tidak ada update, anggap stuck
+            activityTimeout = setTimeout(() => {
+                console.log('⚠️ No activity for 10 seconds - Force closing');
+                forceCloseStuck();
+            }, 10000);
+
+            console.log('🔄 Activity timeout reset (10s)');
+        }
+
+        function clearActivityTimeout() {
+            if (activityTimeout) {
+                clearTimeout(activityTimeout);
+                activityTimeout = null;
+                console.log('✅ Activity timeout cleared');
+            }
+        }
 
         function update(percent, status, info) {
-            if (isCancelled) return;
+            if (exportCancelled) return;
+
             $('#toast-bar').css('width', percent + '%');
             $('#toast-percent').text(percent + '%');
             $('#toast-status').text(status);
             $('#toast-info').text(info);
+
+            // ===== RESET TIMEOUT SETIAP ADA UPDATE =====
+            resetActivityTimeout();
         }
 
         function reset() {
-            if (safetyTimeout) {
-                clearTimeout(safetyTimeout);
-                safetyTimeout = null;
+            // Abort current XHR if any
+            if (currentExportXHR) {
+                currentExportXHR.abort();
+                currentExportXHR = null;
             }
 
-            pendingTimeouts.forEach(t => clearTimeout(t));
-            pendingTimeouts = [];
+            // Clear all timeouts
+            exportTimeouts.forEach(t => clearTimeout(t));
+            exportTimeouts = [];
 
-            if (currentXHR) {
-                currentXHR.abort();
-                currentXHR = null;
-            }
+            // Clear activity timeout
+            clearActivityTimeout();
 
+            // Remove event listeners
             $(document).off('click', '#toast-close');
 
+            // Reset state
             isExporting = false;
-            isCancelled = true;
-            
+            exportCancelled = true;
+
+            // Hide toast
             $('.export-toast').addClass('closing');
             setTimeout(() => {
                 $('#export-toast').hide().html('');
             }, 300);
-            
+
+            // Re-enable button
             $btn.prop('disabled', false).html(originalHtml);
             allData = [];
+
+            console.log('🔄 Export state reset');
+        }
+
+        function forceCloseStuck() {
+            console.log('⏰ Export stuck - Force closing toast');
+
+            // Abort request
+            if (currentExportXHR) {
+                currentExportXHR.abort();
+                currentExportXHR = null;
+            }
+
+            // Update UI
+            $('#toast-icon').removeClass('bx-download').addClass('bx-error-circle').css('color', '#ffc107');
+            $('#toast-title').text('Timeout');
+            $('#toast-status').text('Export terlalu lama');
+            $('#toast-bar').css('background', '#ffc107').css('width', '100%');
+
+            // Tutup setelah 2 detik
+            setTimeout(reset, 2000);
+
+            // Notif
+            showNotif('error', 'Export timeout - Proses terlalu lama');
         }
 
         function cancel() {
-            isCancelled = true;
-            
-            if (safetyTimeout) {
-                clearTimeout(safetyTimeout);
-                safetyTimeout = null;
+            if (!isExporting) return;
+
+            exportCancelled = true;
+
+            console.log('🚫 Export cancelled by user');
+
+            if (currentExportXHR) {
+                currentExportXHR.abort();
+                currentExportXHR = null;
             }
 
-            pendingTimeouts.forEach(t => clearTimeout(t));
-            pendingTimeouts = [];
-            
-            if (currentXHR) {
-                currentXHR.abort();
-                currentXHR = null;
-            }
-            
+            exportTimeouts.forEach(t => clearTimeout(t));
+            exportTimeouts = [];
+
+            // Clear activity timeout
+            clearActivityTimeout();
+
             $('#toast-icon').removeClass('bx-download').addClass('bx-x-circle').css('color', '#dc3545');
             $('#toast-title').text('Cancelled');
             $('#toast-status').text('Export cancelled');
             $('#toast-bar').css('background', '#dc3545').css('width', '100%');
-            
-            const t = setTimeout(reset, 1500);
-            pendingTimeouts.push(t);
+
+            setTimeout(reset, 1500);
         }
 
-        $(document).off('click', '#toast-close').on('click', '#toast-close', function() {
-            if (!isCancelled) {
+        // Cancel button handler
+        $(document).off('click', '#toast-close').on('click', '#toast-close', function () {
+            if (!isExporting) {
+                reset();
+                return;
+            }
+
+            if (!exportCancelled) {
                 cancel();
+            } else {
+                reset();
             }
         });
 
         function fetch() {
-            if (isCancelled) return;
+            if (exportCancelled) {
+                console.log('🚫 Fetch cancelled');
+                return;
+            }
 
-            if (currentXHR) currentXHR.abort();
+            if (currentExportXHR) currentExportXHR.abort();
 
-            currentXHR = $.ajax({
+            currentExportXHR = $.ajax({
                 url: '<?= site_url('purchase-request/get_chunk') ?>',
                 type: 'GET',
-                data: { 
-                    limit: limit, 
+                data: {
+                    limit: limit,
                     offset: offset,
                     filter_start_date: filterStartDate,
                     filter_end_date: filterEndDate,
@@ -537,12 +601,16 @@
                 dataType: 'json',
                 timeout: 30000,
                 success: function (res) {
-                    if (isCancelled) return;
+                    if (exportCancelled) {
+                        console.log('🚫 Fetch response ignored - cancelled');
+                        return;
+                    }
 
-                    currentXHR = null;
+                    currentExportXHR = null;
 
                     if (res.error) {
-                        alert('Error: ' + res.error);
+                        clearActivityTimeout();
+                        showNotif('error', 'Error: ' + res.error);
                         reset();
                         return;
                     }
@@ -553,132 +621,169 @@
                         offset += limit;
 
                         const p = Math.min(Math.floor((totalFetched / (totalFetched + limit)) * 40), 40);
+
+                        // ===== UPDATE (otomatis reset timeout) =====
                         update(p, 'Fetching data...', totalFetched + ' records collected');
 
                         const t = setTimeout(fetch, 100);
-                        pendingTimeouts.push(t);
+                        exportTimeouts.push(t);
                     } else {
+                        // ===== UPDATE (otomatis reset timeout) =====
                         update(40, 'Processing...', totalFetched + ' records ready');
+
                         const t = setTimeout(generate, 200);
-                        pendingTimeouts.push(t);
+                        exportTimeouts.push(t);
                     }
                 },
                 error: function (xhr, status) {
-                    currentXHR = null;
-                    if (status === 'abort' || isCancelled) return;
-                    alert('Failed to fetch data');
+                    currentExportXHR = null;
+                    if (status === 'abort' || exportCancelled) {
+                        console.log('🚫 Fetch aborted');
+                        return;
+                    }
+
+                    clearActivityTimeout();
+                    showNotif('error', 'Failed to fetch data');
                     reset();
                 }
             });
         }
 
         function generate() {
-            if (isCancelled) return;
+            if (exportCancelled) {
+                console.log('🚫 Generate cancelled');
+                return;
+            }
 
             if (allData.length === 0) {
-                alert('No data to export');
+                clearActivityTimeout();
+                showNotif('error', 'No data to export');
                 reset();
                 return;
             }
 
+            // ===== UPDATE (otomatis reset timeout) =====
             update(50, 'Creating file...', 'Generating Excel...');
 
-            if (currentXHR) currentXHR.abort();
+            if (currentExportXHR) currentExportXHR.abort();
 
-            currentXHR = $.ajax({
+            currentExportXHR = $.ajax({
                 url: '<?= site_url('purchase-request/export-excel-all') ?>',
                 type: 'POST',
                 data: JSON.stringify({ data: allData }),
                 contentType: 'application/json',
+                dataType: 'json',
                 timeout: 120000,
-                xhrFields: { responseType: 'blob' },
-                success: function (blob, status, xhr) {
-                    if (isCancelled) return;
-
-                    currentXHR = null;
-                    update(90, 'Almost done...', 'Preparing download');
-
-                    const disposition = xhr.getResponseHeader('Content-Disposition');
-                    let filename = 'All_PR_<?= date("Ymd_His") ?>.xlsx';
-
-                    if (disposition && disposition.indexOf('attachment') !== -1) {
-                        const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                        const matches = filenameRegex.exec(disposition);
-                        if (matches != null && matches[1]) {
-                            filename = matches[1].replace(/['"]/g, '');
-                        }
+                success: function (res) {
+                    if (exportCancelled) {
+                        console.log('🚫 Generate response ignored - cancelled');
+                        return;
                     }
 
-                    const url = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = filename;
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
+                    currentExportXHR = null;
 
-                    const t = setTimeout(function() {
-                        if (isCancelled) return;
+                    // Check if response indicates error
+                    if (!res || res.sukses === 0) {
+                        clearActivityTimeout();
+                        $('#toast-icon').removeClass('bx-download').addClass('bx-error-circle').css('color', '#dc3545');
+                        $('#toast-title').text('Failed');
+                        $('#toast-status').text(res?.pesan || 'Export error');
+                        $('#toast-bar').css('background', '#dc3545');
 
-                        update(100, 'Complete!', allData.length + ' records exported');
-                        $('#toast-icon').removeClass('bx-download').addClass('bx-check-circle').css('color', '#28a745');
-                        $('#toast-bar').css('background', '#28a745');
-                        
-                        $(document).off('click', '#toast-close').on('click', '#toast-close', function() {
+                        setTimeout(function () {
+                            showNotif('error', res?.pesan || 'Export failed');
+                            reset();
+                        }, 1000);
+                        return;
+                    }
+
+                    // ===== UPDATE (otomatis reset timeout) =====
+                    update(90, 'Downloading...', 'Almost done...');
+
+                    // Decode base64 blob from JSON response
+                    try {
+                        const binaryString = atob(res.blob);
+                        const bytes = new Uint8Array(binaryString.length);
+                        for (let i = 0; i < binaryString.length; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+                        // Download file
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = res.filename || 'All_PR_<?= date("Ymd_His") ?>.xlsx';
+                        link.style.display = 'none';
+                        document.body.appendChild(link);
+                        link.click();
+
+                        // Cleanup
+                        setTimeout(() => {
                             if (document.body.contains(link)) {
                                 document.body.removeChild(link);
                             }
                             window.URL.revokeObjectURL(url);
-                            reset();
-                        });
+                        }, 100);
+                    } catch (decodeError) {
+                        console.error('Blob decode error:', decodeError);
+                        clearActivityTimeout();
+                        showNotif('error', 'Gagal memproses file Excel');
+                        reset();
+                        return;
+                    }
 
-                        const autoClose = setTimeout(function() {
-                            if (isExporting && !isCancelled) {
-                                if (document.body.contains(link)) {
-                                    document.body.removeChild(link);
-                                }
-                                window.URL.revokeObjectURL(url);
-                                reset();
-                            }
-                        }, 3000);
-                        pendingTimeouts.push(autoClose);
-                    }, 150);
-                    pendingTimeouts.push(t);
+                    // ===== CLEAR ACTIVITY TIMEOUT (SELESAI!) =====
+                    clearActivityTimeout();
+
+                    // Update UI complete
+                    update(100, 'Complete!', allData.length + ' records exported');
+                    $('#toast-icon').removeClass('bx-download').addClass('bx-check-circle').css('color', '#28a745');
+                    $('#toast-bar').css('background', '#28a745');
+
+                    // Langsung reset setelah 1 detik
+                    setTimeout(reset, 1000);
                 },
                 error: function (xhr, status) {
-                    currentXHR = null;
-                    if (status === 'abort' || isCancelled) return;
+                    currentExportXHR = null;
+                    if (status === 'abort' || exportCancelled) {
+                        console.log('🚫 Generate aborted');
+                        return;
+                    }
+
+                    clearActivityTimeout();
 
                     $('#toast-icon').removeClass('bx-download').addClass('bx-error-circle').css('color', '#dc3545');
                     $('#toast-title').text('Failed');
                     $('#toast-status').text('Export error');
                     $('#toast-bar').css('background', '#dc3545');
-                    
-                    const t = setTimeout(function() {
-                        alert('Export failed');
+
+                    setTimeout(function () {
+                        showNotif('error', 'Export failed');
                         reset();
                     }, 1000);
-                    pendingTimeouts.push(t);
                 }
             });
         }
 
+        // Start fetching
         fetch();
     });
 
+    // Cleanup on page unload
     $(window).on('beforeunload', function () {
-        if (isExporting && currentXHR) {
-            currentXHR.abort();
-            
-            if (safetyTimeout) {
-                clearTimeout(safetyTimeout);
-                safetyTimeout = null;
+        if (isExporting && !exportCancelled) {
+            if (currentExportXHR) {
+                currentExportXHR.abort();
+            }
+            exportTimeouts.forEach(t => clearTimeout(t));
+
+            if (activityTimeout) {
+                clearTimeout(activityTimeout);
             }
 
-            pendingTimeouts.forEach(t => clearTimeout(t));
-            pendingTimeouts = [];
-            
             return 'Export running';
         }
-    });
+    })
+
 </script>

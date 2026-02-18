@@ -77,12 +77,16 @@
                     <span class='fw-normal fs-7'>Customer</span>
                 </div>
             </a>
-
-
             <a href='<?= getURL('purchase-request') ?>' class='no-parent'>
                 <div class='sidebar-item'>
                     <i class='bx bx-receipt'></i>
                     <span class='fw-normal fs-7'>Purchase Request</span>
+                </div>
+            </a>
+            <a href='<?= getURL('files') ?>' class='no-parent'>
+                <div class='sidebar-item'>
+                    <i class='bx bx-folder'></i>
+                    <span class='fw-normal fs-7'>Files</span>
                 </div>
             </a>
 

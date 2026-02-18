@@ -54,18 +54,11 @@ class MPurchaseRequestHd extends Model
     }
 
     /**
-     * 
+     * Universal get method
      * @param mixed $filter - ID, supplierid, atau null (untuk getAll)
      * @param string $filterType - 'id', 'supplier', 'daterange', atau 'all'
      * @param mixed $endDate - Untuk daterange (optional)
      * @param bool $withDetails - Include details atau tidak
-     * 
-     * Contoh penggunaan:
-     * - get(5, 'id') → Get by ID (sama dengan getOne(5))
-     * - get(10, 'supplier') → Get by supplier (sama dengan getBySupplier(10))
-     * - get('2024-01-01', 'daterange', '2024-12-31') → Get by date range
-     * - get(null, 'all') → Get all (sama dengan getAll())
-     * - get(5, 'id', null, true) → Get by ID with details (sama dengan getWithDetails(5))
      */
     public function get($filter = null, $filterType = 'all', $endDate = null, $withDetails = false)
     {
@@ -224,8 +217,6 @@ class MPurchaseRequestHd extends Model
         return $this->db->table('trpurchaserequesthd')->delete([$column => $value]);
     }
 
-    // File: MPurchaseRequestHd.php
-
     public function getChunk($limit, $offset, $filterStartDate = null, $filterEndDate = null, $filterSupplier = null)
     {
         $builder = $this->db->table('trpurchaserequesthd as pr')
@@ -250,4 +241,22 @@ class MPurchaseRequestHd extends Model
             ->getResultArray();
     }
 
+    // ========== IMPORT EXCEL HELPER METHODS (NEW) ==========
+
+    /**
+     * Get Supplier by Name (untuk matching saat import)
+     * FIXED: Hapus ->where('isactive', true) karena kolom isactive 
+     * tidak ada di tabel mssupplier
+     * 
+     * @param string $supplierName
+     * @return array|null
+     */
+    public function getSupplierByName($supplierName)
+    {
+        return $this->db->table('mssupplier')
+            ->select('id, suppliername')
+            ->where('LOWER(suppliername)', strtolower(trim($supplierName)))
+            ->get()
+            ->getRowArray();
+    }
 }

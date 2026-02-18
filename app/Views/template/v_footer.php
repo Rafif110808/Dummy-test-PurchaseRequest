@@ -712,20 +712,35 @@
 
     // Modal func
     function close_modal(modalid) {
-        $("#" + modalid).modal('hide');
-        if (modalid == 'modaldel') {
-            $("#modaldel-assets").html("");
-            $("#modaldel-title").text("")
-            // regenerate_dropdown()
-        } else if (modalid == 'modaldetail') {
-            $("#modaldetail-size").removeClass("modal-lg modal-md modal-sm modal-xl");
-            $("#btn-close-modaldetail").removeClass('lost-elem')
-            $("#modaldetail-title").text("")
-            $("#modaldetail-form").html("")
-        } else if (modalid == 'modalrel') {
-            $("#modalrel-assets").html("");
+        var modalEl = document.getElementById(modalid);
+        if (modalEl) {
+            var modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+                modal.hide();
+            } else {
+                $('#' + modalid).modal('hide');
+            }
         }
-        // console.log($("#modaldetail-form").html())   
+        
+        // Cleanup elements with delay to avoid null errors
+        setTimeout(function() {
+            if (modalid == 'modaldel') {
+                $("#modaldel-assets").html("");
+                $("#modaldel-title").text("");
+            } else if (modalid == 'modaldetail') {
+                var detailSize = document.getElementById('modaldetail-size');
+                var btnClose = document.getElementById('btn-close-modaldetail');
+                var detailTitle = document.getElementById('modaldetail-title');
+                var detailForm = document.getElementById('modaldetail-form');
+                
+                if (detailSize) detailSize.className = detailSize.className.replace(/modal-lg|modal-md|modal-sm|modal-xl/g, '').trim();
+                if (btnClose) btnClose.classList.remove('lost-elem');
+                if (detailTitle) detailTitle.textContent = '';
+                if (detailForm) detailForm.innerHTML = '';
+            } else if (modalid == 'modalrel') {
+                $("#modalrel-assets").html("");
+            }
+        }, 350);
     }
 
     function modalglobal(id, link, title, btn, size) {
@@ -766,6 +781,7 @@
         $(elem).html('<i class="bx bx-loader bx-spin"></i>');
         $(elem).attr('disabled', 'disabled');
         $("button.btn").attr('disabled', 'disabled');
+        
         $.ajax({
             url: link,
             type: 'post',
@@ -788,8 +804,9 @@
                     $(`#modaldetail-size`).addClass(size)
                     $("#modaldetail-title").html(`<h4>${title}</h4>`);
                     $("#modaldetail-form").html(res.view)
-                    $(`#modaldetail`).modal("toggle");
-                    dp('#modaldetail')
+                    
+                    // Show modal using jQuery
+                    $('#modaldetail').modal('show');
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -836,8 +853,9 @@
                     $(`#modaldetailtwo-size`).addClass(size)
                     $("#modaldetailtwo-title").html(`<h4>${title}</h4>`);
                     $("#modaldetailtwo-form").html(res.view)
-                    $(`#modaldetailtwo`).modal("toggle");
-                    dp('#modaldetailtwo')
+                    
+                    // Show modal using jQuery
+                    $('#modaldetailtwo').modal('show');
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -944,10 +962,6 @@
             },
             "deferRender": true,
             dataSrc: function (json) {
-                let gt = json.tambahan.grandtotal;
-                if (gt != undefined) {
-                    $("#text-grandtotal").text(gt);
-                }
                 $("#csrf_token").val(encrypter(json.csrfToken));
                 return json.data
             }
@@ -1072,6 +1086,33 @@
 
     $(document).ready(function () {
         let editorInstance = null;
+
+        // Disable jQuery animations to prevent easing errors - use CSS transitions instead
+        $.fx.off = true;
+
+        // Fix jQuery UI easing compatibility
+        (function() {
+            if (typeof $.easing === 'undefined') {
+                console.warn('jQuery Easing not loaded, applying fallback');
+                return;
+            }
+            
+            $.fx.speeds._default = 300;
+            
+            if (!$.easing.swing) {
+                $.easing.swing = function(x) {
+                    return $.easing.def(x);
+                };
+            }
+            
+            var originalAnimate = $.fn.animate;
+            $.fn.animate = function(speed, easing, callback) {
+                if (!easing || easing === 'swing') {
+                    easing = 'swing';
+                }
+                return originalAnimate.call(this, speed, easing, callback);
+            };
+        })();
 
         dp();
         // load_company();
@@ -2168,4 +2209,8 @@
         return teks;
     }
 </script>
+
+<!-- Dropzone JS -->
+<link href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" rel="stylesheet" type="text/css" />
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 
